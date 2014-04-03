@@ -6,18 +6,25 @@ xenomapper.py
 A script for parsing pairs of sam files and returning sam files containing only reads where no better mapping exist in other files.
 Used for filtering reads where multiple species may contribute (eg human tissue xenografted into mouse).
 
-Created by Matthew Wakefield on 2011-12-08.
-Copyright (c) 2011  Matthew Wakefield and The Walter and Eliza Hall Institute. All rights reserved.
+Created by Matthew Wakefield.
+Copyright (c) 2011-2014  Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne. All rights reserved.
+
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
 """
 import sys
 import os
-import argparse
+import argparse, textwrap
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011,  Matthew Wakefield and The Walter and Eliza Hall Institute"
+__copyright__ = "Copyright 2011-2014 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -167,19 +174,33 @@ def main_paired_end(readpairs, primary_specific=sys.stdout, secondary_specific=N
     pass
 
 def command_line_interface(*args,**kw):
-    parser = argparse.ArgumentParser(description='A script for parsing pairs of sam files and returning sam files containing only reads \
-                                                    where no better mapping exist in other files.\nUsed for filtering reads where multiple \
-                                                    species may contribute (eg human tissue xenografted into mouse, pathogen growing on plant).\n\n\
-                                                    To use bam files in a bash shell use process subtitution:\
-                                                    \txenomapper --primary_specific >(samtools view -bS - > outfilename.bam) \
-                                                    \t\t\t<(samtools view primary.bam) \
-                                                    \t\t\t<(samtools view secondary.bam) \
-                                                    ')
-    parser.add_argument('primary_sam',
+    parser = argparse.ArgumentParser(prog = "xenomapper",
+                    formatter_class=argparse.RawDescriptionHelpFormatter,
+                    description=textwrap.dedent("""\
+                    A script for parsing pairs of sam files and returning sam files
+                    containing only reads where no better mapping exist in other files.
+                    Used for filtering reads where multiple species may contribute 
+                    (eg human tissue xenografted into mouse, pathogen growing on plant).
+                    """),
+                    epilog = textwrap.dedent("""\
+                    To use bam files in a bash shell use process subtitution:
+                        xenomapper --primary_specific >(samtools view -bS - > outfilename.bam) \\
+                                   --primary_sam      <(samtools view primary.bam) \\
+                                   --secondary_sam    <(samtools view secondary.bam)
+                    
+                    This program is distributed in the hope that it will be useful,
+                    but WITHOUT ANY WARRANTY; without even the implied warranty of
+                    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n
+                    
+                    """),
+                    )
+    parser.add_argument('--primary_sam',
                         type=argparse.FileType('rt'),
+                        default=None,
                         help='a SAM format Bowtie2 mapping output file corrisponding to the primary species of interest')
-    parser.add_argument('secondary_sam',
+    parser.add_argument('--secondary_sam',
                         type=argparse.FileType('rt'),
+                        default=None,
                         help='a SAM format Bowtie2 mapping output file corrisponding to the secondary or contaminating species')
     parser.add_argument('--primary_specific',
                         type=argparse.FileType('wt'),
@@ -208,7 +229,19 @@ def command_line_interface(*args,**kw):
     parser.add_argument('--paired',
                         action='store_true',
                         help='the SAM files consist of paired reads with forward and reverse reads occuring once and interlaced')
-    return parser.parse_args(*args,**kw)
+    parser.add_argument('--version',
+                        action='store_true',
+                        help='print version information and exit')
+    args = parser.parse_args()
+    if args.version:
+        print(__version__)
+        sys.exit()
+    if not args.primary_sam or not args.secondary_sam:
+        print('ERROR: You must provide --primary_sam and --secondary_sam \n')
+        parser.print_help()
+        sys.exit(1)
+    return args
+    
 
 def main():
     args = command_line_interface()
