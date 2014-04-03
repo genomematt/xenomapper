@@ -23,6 +23,51 @@ __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
 
 
+class Mappability(dict):
+    def __init__(self, chromosome_sizes = {'test':100}):
+        for chrom in chromosome_sizes:
+            self[chrom] = [0,]*chromosome_sizes[chrom]
+            self.chromosome_sizes = chromosome_sizes
+    
+    def to_wiggle(self, wigglefile=sys.stdout):
+        """Output mappability data in wiggle format"""
+        pass
+    
+    def from_wiggle(self,wigglefile=sys.stdin):
+        """Load mapability data from a wiggle file"""
+        pass
+    
+    def single_end_to_paired(self, mate_density = [1,]):
+        """Produce a new mappability object with paired end mapping probilities
+        Defines paired end mappability as either end being uniquely mappable.
+        Arguments:
+            mate_density:   a list of floats between 0.0 and 1.0 representing mate densities.
+                            First entry corresponds to current position
+                            all entries must sum to 1.0
+        """
+        def _mappability_by_mate_density(mapability,mate_density):
+            #defined as local scope function as may be replaced for speed.
+            result = 0
+            j = 0
+            while j < len(mapability) and j < len(mate_density):
+                result += mapability[j] * mate_density[j]
+                j += 1
+            return result
+        
+        assert sum(mate_density) == 1.0
+        
+        paired_mappability = Mappability(chromosome_sizes = self.chromosome_sizes)
+        
+        for chrom in self:
+            for i in range(len(self[chrom])):
+                if self[chrom][i] == 1:
+                    paired_mappability[chrom][i] = 1.0
+                else:
+                    paired_mappability[chrom][i] = _mappability_by_mate_density(self[chrom][i:i+len(mate_density)],mate_density)
+        
+        return paired_mappability
+    
+
 def parse_fasta(fastafile, token='>'):
     """fasta and multi-fasta file parser
     Usage: for name,seq in fasta(open(filename)):
