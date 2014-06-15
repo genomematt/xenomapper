@@ -222,12 +222,18 @@ def command_line_interface(*args,**kw):
                     containing only reads where no better mapping exist in other files.
                     Used for filtering reads where multiple species may contribute 
                     (eg human tissue xenografted into mouse, pathogen growing on plant).
+                    
+                    Files must contain an AS and XS score and better matches must have
+                    a higher alignment score.
+                    In practice this is acchieved by using bowtie2 in --local mode.
+                    If the -p option is used you must also use --reorder.
+                    
+                    All input files must be seekable
+                    (ie not a FIFO, process substitution or pipe)'
                     """),
                     epilog = textwrap.dedent("""\
-                    To use bam files in a bash shell use process subtitution:
-                        xenomapper --primary_specific >(samtools view -bS - > outfilename.bam) \\
-                                   --primary_sam      <(samtools view primary.bam) \\
-                                   --secondary_sam    <(samtools view secondary.bam)
+                    To output bam files in a bash shell use process subtitution:
+                        xenomapper --primary_specific >(samtools view -bS - > outfilename.bam) 
                     
                     This program is distributed in the hope that it will be useful,
                     but WITHOUT ANY WARRANTY; without even the implied warranty of
