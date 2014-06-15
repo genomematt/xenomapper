@@ -19,12 +19,13 @@ Copyright (c) 2011-2014  Matthew Wakefield, The Walter and Eliza Hall Institute 
 import sys
 import os
 import argparse, textwrap
+import subprocess
 
 __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2014 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.2"
+__version__ = "0.3.0"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -38,13 +39,49 @@ def get_sam_header(samfile):
         line = samfile.readline().strip('\n')
         if line[0] == '@':
             header.append(line)
-    samfile.seek(pointer)
+    samfile.seek(pointer) #set file to first line after header
     return header
+
+def get_bam_header(bamfile):
+    p = subprocess.Popen('samtools view -H -',stdin=bamfile,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+    header = []
+    for line in p.stdout:
+        header.append(line.decode('ascii'))
+    bamfile.seek(0) #reset to start of file for next samtools call
+    return header
+
     
 #### To do: Check aligner and command line options in SAM file & warn if not bowtie2 or if there is an argument mismatch
 
 
 #['HWI-ST960:63:D0CYJACXX:4:1101:6951:2219', '0', '9', '20953017', '44', '49M1S', '*', '0', '0', 'GNTTTATTGGAGCAGCTATTGGCTTCTTCATTGCAGGAGGAAAAAAAGGT', '@#1ADDDFFHFFHIJIJJIJIJJJJ?EH@@FFFGIII@GHCHIIJJI@F8', 'AS:i:87', 'XN:i:0', 'XM:i:2', 'XO:i:0', 'XG:i:0', 'NM:i:2', 'MD:Z:1T30A16', 'YT:Z:UU\n']
+
+def bam_lines(f):
+    p = subprocess.Popen('samtools view -',stdin=f,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+    header_lines = []
+    for line in p.stdout:
+        yield line.decode('ascii')
+
+def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False):
+    bam1 = bam_lines(bamfile1)
+    bam2 = bam_lines(bamfile2)
+    line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
+    line2= next(bam2).strip('\n').split()
+    while line1 and line2 and line1 !=[''] and line2 !=['']:
+        #print(line1[0],line2[0],file=sys.stderr)
+        assert line1[0] == line2[0]
+        yield line1,line2
+        previous_read1 = line1[0]
+        previous_read2 = line2[0]
+        if skip_repeated_reads:
+            while line1 and line2 and line1 !=[''] and line2 !=[''] and line1[0] == previous_read1:
+                line1= next(bam1).strip('\n').split()
+            while line1 and line2 and line1 !=[''] and line2 !=[''] and line2[0] == previous_read2:
+                line2= next(bam2).strip('\n').split()
+        else:
+            line1= next(bam1).strip('\n').split()
+            line2= next(bam2).strip('\n').split()
+    pass
 
 def getReadPairs(sam1,sam2, skip_repeated_reads=False):
     line1= sam1.readline().strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
@@ -66,9 +103,13 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
             
     pass
 
-def process_sam_headers(sam1,sam2, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None):
-    samheader1 = "\n".join(get_sam_header(sam1))
-    samheader2 = "\n".join(get_sam_header(sam2))
+def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, bam=False):
+    if bam:
+        samheader1 = "\n".join(get_bam_header(file1))
+        samheader2 = "\n".join(get_bam_header(file2))
+    else:
+        samheader1 = "\n".join(get_sam_header(file1))
+        samheader2 = "\n".join(get_sam_header(file2))
     print(samheader1, file=primary_specific)
     if secondary_specific:
         print(samheader2, file=secondary_specific)
@@ -202,6 +243,14 @@ def command_line_interface(*args,**kw):
                         type=argparse.FileType('rt'),
                         default=None,
                         help='a SAM format Bowtie2 mapping output file corrisponding to the secondary or contaminating species')
+    parser.add_argument('--primary_bam',
+                        type=argparse.FileType('rb'),
+                        default=None,
+                        help='a BAM format Bowtie2 mapping output file corrisponding to the primary species of interest')
+    parser.add_argument('--secondary_bam',
+                        type=argparse.FileType('rb'),
+                        default=None,
+                        help='a BAM format Bowtie2 mapping output file corrisponding to the secondary or contaminating species')
     parser.add_argument('--primary_specific',
                         type=argparse.FileType('wt'),
                         default=sys.stdout,
@@ -236,8 +285,9 @@ def command_line_interface(*args,**kw):
     if args.version:
         print(__version__)
         sys.exit()
-    if not args.primary_sam or not args.secondary_sam:
-        print('ERROR: You must provide --primary_sam and --secondary_sam \n')
+    if (not args.primary_sam or not args.secondary_sam) and \
+        (not args.primary_bam or not args.secondary_bam):
+        print('ERROR: You must provide --primary_sam and --secondary_sam\n or --primary_bam and --secondary_bam\n')
         parser.print_help()
         sys.exit(1)
     return args
@@ -247,15 +297,28 @@ def main():
     args = command_line_interface()
     #print(args, file=sys.stderr)
     
-    process_sam_headers(args.primary_sam,args.secondary_sam,
-                        primary_specific=args.primary_specific,
-                        secondary_specific=args.secondary_specific,
-                        primary_multi=args.primary_multi,
-                        secondary_multi=args.secondary_multi,
-                        unassigned=args.unassigned,
-                        unresolved=args.unresolved)
+    if args.primary_sam:
+        process_headers(args.primary_sam,args.secondary_sam,
+                            primary_specific=args.primary_specific,
+                            secondary_specific=args.secondary_specific,
+                            primary_multi=args.primary_multi,
+                            secondary_multi=args.secondary_multi,
+                            unassigned=args.unassigned,
+                            unresolved=args.unresolved)
                         
-    readpairs = getReadPairs(args.primary_sam,args.secondary_sam)
+        readpairs = getReadPairs(args.primary_sam,args.secondary_sam)
+    else:
+        process_headers(args.primary_bam,args.secondary_bam,
+                            primary_specific=args.primary_specific,
+                            secondary_specific=args.secondary_specific,
+                            primary_multi=args.primary_multi,
+                            secondary_multi=args.secondary_multi,
+                            unassigned=args.unassigned,
+                            unresolved=args.unresolved,
+                            bam=True)
+                        
+        readpairs = getBamReadPairs(args.primary_bam,args.secondary_bam)
+        
     
     if args.paired:
         main_paired_end(readpairs,
