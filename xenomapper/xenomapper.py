@@ -25,7 +25,7 @@ __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2014 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -48,7 +48,7 @@ def get_bam_header(bamfile):
     for line in p.stdout:
         header.append(line.decode('ascii'))
     bamfile.seek(0) #reset to start of file for next samtools call
-    return header
+    return [x.strip('\n') for x in header]
 
     
 #### To do: Check aligner and command line options in SAM file & warn if not bowtie2 or if there is an argument mismatch
