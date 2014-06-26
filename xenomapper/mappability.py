@@ -31,8 +31,18 @@ class Mappability(dict):
                 self.chromosome_sizes = chromosome_sizes
         pass
     
-    def to_wiggle(self, wigglefile=sys.stdout):
-        """Output mappability data in wiggle format"""
+    def to_wiggle(self, wigglefile=sys.stdout, chromosomes=[]):
+        """Output mappability data to file in wiggle format"""
+        ## Wiggle file format is:
+        #fixedStep chrom=chrN start=pos step=1
+        #value
+        #value
+        for chrom in self:
+            if chromosomes and not chrom in chromosomes:
+                continue
+            print('fixedStep\tchrom={0}\tstart=1\tstep=1'.format(chrom), file=wigglefile)
+            for score in self[chrom]:
+                print(str(score))
         pass
     
     def from_wiggle(self,wigglefile=sys.stdin):
