@@ -29,7 +29,7 @@ class Mappability(dict):
         if chromosome_sizes:
             for chrom in chromosome_sizes:
                 self[chrom] = [0,]*chromosome_sizes[chrom]
-                self.chromosome_sizes = chromosome_sizes
+        self.chromosome_sizes = chromosome_sizes
         pass
     
     def to_wiggle(self, wigglefile=sys.stdout, chromosomes=[]):
@@ -46,8 +46,39 @@ class Mappability(dict):
                 print(str(score))
         pass
     
-    def from_wiggle(self,wigglefile=sys.stdin):
-        """Load mapability data from a wiggle file"""
+    def from_wiggle(self,wigglefile=sys.stdin,datatype=float):
+        """Load mapability data from a wiggle file
+        The wiggle file must be fixed step format, step of one and start at 1
+        Multiple chromosomes may be present in the same file
+        This function will overwrite any existing chromosomes
+        with the same name but can be used sequentially for
+        different chromosomes
+        """
+        chrom=None
+        values=[]
+        for line in wigglefile:
+            if line.startswith('fixedStep'):
+                #add a chromosome to self
+                #check it is not already there
+                #check start=1 and step=1
+                line = line.strip().split('\t')
+                if line[1].split('=')[0] != 'chrom' or line[2] != 'start=1' or line[3] != 'step=1':
+                    raise ValueError('Unsupported wiggle fixed step format [must be in the format "fixedStep chrom=chrX start=1 step=1"] {0}'.format(line))
+                if chrom and values:
+                    #if we have accumulated values for a previous chromosome add them to self
+                    self[chrom]=values
+                chrom=line[1].split('=')[1]
+                values=[]
+            else:
+                try:
+                    values.append(datatype(line))
+                except:
+                    #placeholder for type conversion error handling
+                    raise
+        #at end of file add remaining data to self
+        self[chrom]=values
+        for chrom in self:
+            self.chromosome_sizes[chrom]=len(self[chrom])
         pass
     
     def single_end_to_paired(self, mate_density = [1,]):
