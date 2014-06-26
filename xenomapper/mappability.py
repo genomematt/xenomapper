@@ -24,10 +24,12 @@ __status__ = "Development"
 
 
 class Mappability(dict):
-    def __init__(self, chromosome_sizes = {'test':100}):
-        for chrom in chromosome_sizes:
-            self[chrom] = [0,]*chromosome_sizes[chrom]
-            self.chromosome_sizes = chromosome_sizes
+    def __init__(self, chromosome_sizes = {}):
+        if chromosome_sizes:
+            for chrom in chromosome_sizes:
+                self[chrom] = [0,]*chromosome_sizes[chrom]
+                self.chromosome_sizes = chromosome_sizes
+        pass
     
     def to_wiggle(self, wigglefile=sys.stdout):
         """Output mappability data in wiggle format"""

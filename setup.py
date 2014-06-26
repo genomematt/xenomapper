@@ -14,7 +14,7 @@ setup(
     license='GPL',
     entry_points={
         'console_scripts': ['xenomapper = xenomapper.xenomapper:main',
-                            'xenomappability = xenomapper.xenomappability:main'
+                            'xenomappability = xenomapper.mappability:main'
                            ]
     },
 
