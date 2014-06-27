@@ -233,7 +233,7 @@ def remove_small_values(the_list,relative_limit=0.1):
             result.append(0)
     return result
     
-def mate_distribution_from_sam(samfile=sys.stdin, sample_size=0):
+def mate_distribution_from_sam(samfile=sys.stdin, sample_size=10000):
     sizes = []
     for line in samfile:
         if not line or line[0] == '@':
@@ -243,10 +243,6 @@ def mate_distribution_from_sam(samfile=sys.stdin, sample_size=0):
             sizes.append(abs(int(insert_size)))
         if sample_size and len(sizes) > sample_size:
             break
-    print(sorted(sizes))
-    print(max(sizes))
-    print(mean(sizes))
-    print(min(sizes))
     frequencies = Counter(sizes)
     mate_density = []
     for i in range(0,max(sizes)):
@@ -254,11 +250,6 @@ def mate_distribution_from_sam(samfile=sys.stdin, sample_size=0):
             mate_density.append(frequencies[i])
         else:
             mate_density.append(0)
-    print(smoothed_list(mate_density))
-    
-    print(normalised_list(remove_small_values(smoothed_list(mate_density))))
-    print(abs(sum(normalised_list(remove_small_values(smoothed_list(mate_density))))-1.0) < 0.000001)
-    #[print('*'*x) for x in mate_density]
     return normalised_list(remove_small_values(smoothed_list(mate_density)))
 
 def command_line_interface():
