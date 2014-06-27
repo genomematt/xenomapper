@@ -12,6 +12,8 @@ Copyright (c) 2011  Matthew Wakefield and The Walter and Eliza Hall Institute. A
 import sys
 import os
 import argparse
+from statistics import *
+from collections import Counter
 from xenomapper.xenomapper import get_sam_header
 
 __author__ = "Matthew Wakefield"
@@ -98,7 +100,9 @@ class Mappability(dict):
                 j += 1
             return result
         
-        assert sum(mate_density) == 1.0
+        #should sum to 1 but allow for numerical error
+        #summing to 1 is not algorythmically essential
+        assert abs(sum(mate_density)-1.0) < 0.000001 
         
         paired_mappability = Mappability(chromosome_sizes = self.chromosome_sizes)
         
@@ -199,7 +203,7 @@ def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_g
     mapable.to_wiggle(wigglefile=outfile)
     
     pass
-    
+
 def paired_end_mappability(wiggle, mate_density, outfile=sys.stdout, chromosome_sizes={}):
     mapable = Mappability(chromosome_sizes=chromosome_sizes)
     
@@ -210,7 +214,52 @@ def paired_end_mappability(wiggle, mate_density, outfile=sys.stdout, chromosome_
     pair_mapability.to_wiggle(wigglefile=outfile)
     
     pass
+
+def smoothed_list(the_list,width=10):
+    return [mean(the_list[max(0,x-width-1):x+width]) for x in range(len(the_list))]
+
+def normalised_list(the_list):
+    total = sum(the_list)
+    return [x/total for x in the_list]
+
+def remove_small_values(the_list,relative_limit=0.1):
+    """replaces values less than maximum_value * relative_limit with 0"""
+    min_value = max(the_list) * relative_limit
+    result = []
+    for x in the_list:
+        if x > min_value:
+            result.append(x)
+        else:
+            result.append(0)
+    return result
     
+def mate_distribution_from_sam(samfile=sys.stdin, sample_size=0):
+    sizes = []
+    for line in samfile:
+        if not line or line[0] == '@':
+            continue
+        name, x, chrom, pos, flag, cigar, mate_chr, mate_pos, insert_size, seq, qual, *tags = line.strip('\n').split()
+        if flag not in [] and insert_size != '0':#this should be for flag in and list of valid mate pair mapped flags
+            sizes.append(abs(int(insert_size)))
+        if sample_size and len(sizes) > sample_size:
+            break
+    print(sorted(sizes))
+    print(max(sizes))
+    print(mean(sizes))
+    print(min(sizes))
+    frequencies = Counter(sizes)
+    mate_density = []
+    for i in range(0,max(sizes)):
+        if i in frequencies:
+            mate_density.append(frequencies[i])
+        else:
+            mate_density.append(0)
+    print(smoothed_list(mate_density))
+    
+    print(normalised_list(remove_small_values(smoothed_list(mate_density))))
+    print(abs(sum(normalised_list(remove_small_values(smoothed_list(mate_density))))-1.0) < 0.000001)
+    #[print('*'*x) for x in mate_density]
+    return normalised_list(remove_small_values(smoothed_list(mate_density)))
 
 def command_line_interface():
     parser = argparse.ArgumentParser(description='A script for generating mappability estimates for paired end data.\
@@ -220,7 +269,7 @@ def command_line_interface():
                                                 For xenomapper this is mapping against the two reference genomes in \
                                                 single end mode, and processing to primary unique mappings. \
                                                 Step three is to generate a single end mappability wiggle with --mapped_test_data.\
-                                                Step four is to generate a mappability wiggle file using the --single_end_wiggle and --bam_for_size_distribution.')
+                                                Step four is to generate a mappability wiggle file using the --single_end_wiggle and --sam_for_sizes.')
     parser.add_argument('--fasta',
                         type=argparse.FileType('rt'),
                         help='Process a fasta genome file of sequences to simulated reads in fasta format.\
@@ -237,17 +286,20 @@ def command_line_interface():
     parser.add_argument('--single_end_wiggle',
                         type=argparse.FileType('rt'),
                         help='a wiggle file of single end mappabilities')
+    parser.add_argument('--sam_for_sizes',
+                        type=argparse.FileType('rt'),
+                        help='a sam file for calculating insert sizes')
     return parser.parse_args()
 
-def main():
-    args = command_line_interface()
+def main(args = command_line_interface()):
     if args.fasta:
         simulate_reads(fastafile=args.fasta, readlength=args.readlength)
     elif args.mapped_test_data:
         single_end_mappability_from_sam(samfile=args.mapped_test_data)
     elif args.single_end_wiggle:
-        #for testing set mate densities ### TODO estimate the densities from a sam file
-        mate_density = [0,0.01,0.01,0.01,0.01,0.01,0.1,0.2,0.3,0.2,0.1,0.01,0.01,0.01,0.01,0.01,]
+        if not args.sam_for_sizes:
+            raise RuntimeError('You must provide a sam file to estimate the mate pair distance distribution')
+        mate_density = mate_distribution_from_sam(args.sam_for_sizes)
         paired_end_mappability(wiggle=args.single_end_wiggle, mate_density=mate_density)
     pass
 
