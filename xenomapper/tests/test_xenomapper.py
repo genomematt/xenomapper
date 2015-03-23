@@ -47,7 +47,7 @@ class test_main(unittest.TestCase):
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
         main_paired_end(getReadPairs(sam1,sam2), primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
         test_primary_specific_outfile.seek(0)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.read().encode('latin-1')).hexdigest(),'2f5d9bddbb8d4d8daa07a3581db47818f943b658a891fcd00b183ce6')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.read().encode('latin-1')).hexdigest(),'7b34b93efc8d8eb284fd294534f2ac82a85d41cf39039e477a227f2f')
         sam1.close()
         sam2.close()
         pass
