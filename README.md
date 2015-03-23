@@ -18,6 +18,7 @@ Xenomapper requires python 3.4 or higher and is tested on linux and MacOS.  For 
     pip3 install xenomapper
     python3 -m xenomapper.tests.test_all
 
+All users should upgrade to v0.5.0
 
 Using Xenomapper
 ================
@@ -32,6 +33,7 @@ usage:
                       [--primary_multi PRIMARY_MULTI]
                       [--secondary_multi SECONDARY_MULTI]
                       [--unassigned UNASSIGNED] [--unresolved UNRESOLVED]
+                      [--min_score]
                       [--paired] [--version]
     
 
@@ -83,6 +85,11 @@ optional arguments:
                           equally well in both species) reads
     --paired              the SAM files consist of paired reads with forward and
                           reverse reads occuring once and interlaced
+    --min_score MIN_SCORE
+                          the minimum mapping score required. Reads with lower
+                          scores will be considered unassigned. Values should be
+                          chosen based on the mapping program and read length
+                          (score is as SAM AS field value)
     --version             print version information and exit
 
 
