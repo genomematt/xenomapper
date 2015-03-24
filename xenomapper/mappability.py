@@ -280,7 +280,9 @@ def command_line_interface():
     parser.add_argument('--sam_for_sizes',
                         type=argparse.FileType('rt'),
                         help='a sam file for calculating insert sizes')
-    return parser.parse_args()
+    args = parser.parse_args()
+    #### TODO test for no arguments and print help
+    return args
 
 def main(args = command_line_interface()):
     if args.fasta:

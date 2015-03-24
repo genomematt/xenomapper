@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='XenoMapper',
-    version='0.4.0',
+    version='0.5.0',
     author='Matthew Wakefield',
     author_email='matthew.wakefield@unimelb.edu.au',
     packages=['xenomapper'],
@@ -17,14 +17,13 @@ setup(
                             'xenomappability = xenomapper.mappability:main'
                            ]
     },
-
+    test_suite='xenomapper.tests.test_all',
     description='xenomapper - mapping mixed reads from two species',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     classifiers=[
           'Development Status :: 3 - Alpha',
           'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
           'Operating System :: POSIX',
-          'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],

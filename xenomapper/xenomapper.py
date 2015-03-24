@@ -7,7 +7,7 @@ A script for parsing pairs of sam files and returning sam files containing only 
 Used for filtering reads where multiple species may contribute (eg human tissue xenografted into mouse).
 
 Created by Matthew Wakefield.
-Copyright (c) 2011-2014  Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne. All rights reserved.
+Copyright (c) 2011-2015  Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne. All rights reserved.
 
    
    This program is distributed in the hope that it will be useful,
@@ -22,10 +22,10 @@ import argparse, textwrap
 import subprocess
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011-2014 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
+__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -50,7 +50,6 @@ def get_bam_header(bamfile):
     bamfile.seek(0) #reset to start of file for next samtools call
     return [x.strip('\n') for x in header]
 
-    
 #### To do: Check aligner and command line options in SAM file & warn if not bowtie2 or if there is an argument mismatch
 
 
@@ -100,7 +99,6 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
         else:
             line1= sam1.readline().strip('\n').split()
             line2= sam2.readline().strip('\n').split()
-            
     pass
 
 def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, bam=False):
@@ -123,35 +121,61 @@ def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific
         print(samheader1, file=unresolved)
     pass
 
-def main_single_end(readpairs, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None):
+def get_mapping_state(AS1,XS1,AS2,XS2, min_score=0.0):
+    if not ((AS1 and AS1 >= [min_score]) or \
+            (AS2 and AS2 >= [min_score])):  #low quality mapping in both
+        return 'unassigned'
+    elif AS1 and (not AS2 or AS1 > AS2): #maps in primary better than secondary
+        if not XS1 or AS1 > XS1:       #maps uniquely in primary better than secondary
+            return 'primary_specific'
+        else:            #multimaps in primary better than secondary
+            return 'primary_multi' 
+    elif not AS2 and not AS1:          #does not map in either
+        return 'unassigned'
+    elif AS1 == AS2:                   #maps equally well in both
+        return 'unresolved'
+    elif AS2 and ((not AS1) or AS2 > AS1): #maps in secondary better than primary
+        if (not XS2) or AS2 > XS2:
+            return 'secondary_specific'
+        else:
+            return 'secondary_multi' #multimaps in secondary better than primary
+    else: raise RuntimeError('Error in processing logic with values {0} '.format((AS1,XS1,AS2,XS2)))
+
+def main_single_end(readpairs, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, min_score=0.0):
     #assume that reads occur only once and are in the same order in both files
     #TO DO: add a test for these conditions
+    
     for line1,line2 in readpairs:
         assert line1[0] == line2[0]
         AS1 = [int(x.split(':')[-1]) for x in line1[11:] if 'AS' in x]
         XS1 = [int(x.split(':')[-1]) for x in line1[11:] if 'XS' in x]
         AS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'AS' in x]
         XS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'XS' in x]
-        if AS1 and (not AS2 or AS1 > AS2): #maps in primary better than secondary
-            if not XS1 or AS1 > XS1:       #maps uniquely in primary better than secondary
-                print('\t'.join(line1),file=primary_specific) #12 tab separated fields, all additional tags space sep.
-            elif primary_multi:            #multimaps in primary better than secondary
-                print('\t'.join(line1),file=primary_multi) 
-        elif not AS2 and not AS1:          #does not map in either
-            if unassigned: print('\t'.join(line1),file=unassigned)
-        elif AS1 == AS2:                   #maps equally well in both
+        
+        state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
+        if state == 'primary_specific':
+            if primary_specific:
+                print('\t'.join(line1),file=primary_specific)
+        elif state == 'secondary_specific':
+            if secondary_specific:
+                print('\t'.join(line2),file=secondary_specific)
+        elif state == 'primary_multi':
+            if primary_multi:
+                print('\t'.join(line1),file=primary_multi)
+        elif state == 'secondary_multi':
+            if secondary_multi:
+                print('\t'.join(line2),file=secondary_multi)
+        elif state == 'unassigned':
+            if unassigned:
+                print('\t'.join(line1),file=unassigned)
+        elif state == 'unresolved':
             if unresolved:
-                print('\t'.join(line1),file=unresolved) #does this need to be two unresolved mapping files?
+                print('\t'.join(line1),file=unresolved)
                 print('\t'.join(line2),file=unresolved)
-        elif AS2 and ((not AS1) or AS2 > AS1): #maps in secondary better than primary
-            if (not XS2) or AS2 > XS2:
-                if secondary_specific:
-                    print('\t'.join(line2),file=secondary_specific) #maps uniquely in secondary better than primary
-            elif secondary_multi:
-                    print('\t'.join(line2),file=secondary_multi) #multimaps in secondary better than primary
+        else: raise RuntimeError('Unexpected state {0} '.format(state))
     pass
 
-def main_paired_end(readpairs, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None):
+def main_paired_end(readpairs, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, min_score=0.0):
     #assume that paired end reads are sequential in the bam file, occur only once, and are in the same order in both files
     #TO DO: add a test for these conditions
     
@@ -187,29 +211,37 @@ def main_paired_end(readpairs, primary_specific=sys.stdout, secondary_specific=N
         AS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'AS' in x]
         XS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'XS' in x]
         
-        if AS1 and (not AS2 or AS1 > AS2): #maps in primary better than secondary
-            if not XS1 or AS1 > XS1:       #maps uniquely in primary better than secondary
-                print('\t'.join(previous_line1[:11])+'\t'+' '.join(previous_line1[11:]),file=primary_specific) 
-                print('\t'.join(line1),file=primary_specific) 
-            elif primary_multi:            #multimaps in primary better than secondary
-                print('\t'.join(previous_line1[:11])+'\t'+' '.join(previous_line1[11:]),file=primary_multi) 
-                print('\t'.join(line1),file=primary_multi) 
-        elif not AS2 and not AS1:          #does not map in either
-            if unassigned: print('\t'.join(line1),file=unassigned)
-        elif AS1 == AS2:                   #maps equally well in both
+        forward_state = get_mapping_state(PAS1,PXS1,PAS2,PXS2,min_score)
+        reverse_state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
+        
+        if forward_state == 'primary_specific' or reverse_state == 'primary_specific':
+            if primary_specific:
+                print('\t'.join(previous_line1),file=primary_specific) 
+                print('\t'.join(line1),file=primary_specific)
+        elif forward_state == 'secondary_specific' or reverse_state == 'secondary_specific':
+            if secondary_specific:
+                print('\t'.join(previous_line2),file=secondary_specific) 
+                print('\t'.join(line2),file=secondary_specific)
+        elif forward_state == 'primary_multi' or reverse_state == 'primary_multi':
+            if primary_multi:
+                print('\t'.join(previous_line1),file=primary_multi) 
+                print('\t'.join(line1),file=primary_multi)
+        elif forward_state == 'secondary_multi' or reverse_state == 'secondary_multi':
+            if secondary_multi:
+                print('\t'.join(previous_line2),file=secondary_multi) 
+                print('\t'.join(line2),file=secondary_multi)
+        elif forward_state == 'unresloved' or reverse_state == 'unresolved':
             if unresolved:
-                print('\t'.join(previous_line1[:11])+'\t'+' '.join(previous_line1[11:]),file=unresolved) #does this need to be two unresolved mapping files?
+                print('\t'.join(previous_line1),file=unresolved) 
                 print('\t'.join(line1),file=unresolved)
-                print('\t'.join(previous_line2[:11])+'\t'+' '.join(previous_line2[11:]),file=unresolved)
+                print('\t'.join(previous_line2),file=unresolved) 
                 print('\t'.join(line2),file=unresolved)
-        elif AS2 and ((not AS1) or AS2 > AS1): #maps in secondary better than primary
-            if (not XS2) or AS2 > XS2:
-                if secondary_specific:
-                    print('\t'.join(previous_line2[:11])+'\t'+' '.join(previous_line2[11:]),file=secondary_specific) #maps uniquely in secondary better than primary
-                    print('\t'.join(line2),file=secondary_specific) #maps uniquely in secondary better than primary
-            elif secondary_multi:
-                    print('\t'.join(previous_line2[:11])+'\t'+' '.join(previous_line2[11:]),file=secondary_multi) #multimaps in secondary better than primary
-                    print('\t'.join(line2),file=secondary_multi) #multimaps in secondary better than primary
+        elif forward_state == 'unassigned' or reverse_state == 'unassigned':
+            if unassigned:
+                print('\t'.join(previous_line1),file=unresolved) 
+                print('\t'.join(line1),file=unresolved)
+        else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state))
+
         previous_line1 = line1
         previous_line2 = line2
     pass
@@ -284,6 +316,11 @@ def command_line_interface(*args,**kw):
     parser.add_argument('--paired',
                         action='store_true',
                         help='the SAM files consist of paired reads with forward and reverse reads occuring once and interlaced')
+    parser.add_argument('--min_score',
+                        type=float,
+                        default=0.0,
+                        help='the minimum mapping score required.  Reads with lower scores will be considered unassigned. \
+                              Values should be chosen based on the mapping program and read length (score is as SAM AS field value)')
     parser.add_argument('--version',
                         action='store_true',
                         help='print version information and exit')
@@ -333,7 +370,8 @@ def main():
                         primary_multi=args.primary_multi,
                         secondary_multi=args.secondary_multi,
                         unassigned=args.unassigned,
-                        unresolved=args.unresolved)
+                        unresolved=args.unresolved,
+                        min_score=args.min_score)
         
     else:
         main_single_end(readpairs,
@@ -342,7 +380,8 @@ def main():
                         primary_multi=args.primary_multi,
                         secondary_multi=args.secondary_multi,
                         unassigned=args.unassigned,
-                        unresolved=args.unresolved)
+                        unresolved=args.unresolved,
+                        min_score=args.min_score)
     pass
 
 
