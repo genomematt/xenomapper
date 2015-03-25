@@ -121,9 +121,17 @@ def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific
         print(samheader1, file=unresolved)
     pass
 
+def get_tag(sam_line,tag='AS'):
+    tag_list = [x for x in sam_line[11:] if tag in x]
+    if not tag_list:
+        return float('-inf') #this will always be worse than any bowtie score
+    if len(tag_list) > 1:
+        raise ValueError('SAM line has multiple values of {0}: {1}'.format(tag,sam_line))
+    return float(tag_list[0].split(':')[-1])
+
 def get_mapping_state(AS1,XS1,AS2,XS2, min_score=0.0):
-    if not ((AS1 and AS1 >= [min_score]) or \
-            (AS2 and AS2 >= [min_score])):  #low quality mapping in both
+    if not ((AS1 and AS1 >= min_score) or \
+            (AS2 and AS2 >= min_score)):  #low quality mapping in both
         return 'unassigned'
     elif AS1 and (not AS2 or AS1 > AS2): #maps in primary better than secondary
         if not XS1 or AS1 > XS1:       #maps uniquely in primary better than secondary
@@ -141,16 +149,24 @@ def get_mapping_state(AS1,XS1,AS2,XS2, min_score=0.0):
             return 'secondary_multi' #multimaps in secondary better than primary
     else: raise RuntimeError('Error in processing logic with values {0} '.format((AS1,XS1,AS2,XS2)))
 
-def main_single_end(readpairs, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, min_score=0.0):
+def main_single_end(readpairs,
+                    primary_specific=sys.stdout,
+                    secondary_specific=None,
+                    primary_multi=None,
+                    secondary_multi=None,
+                    unassigned=None,
+                    unresolved=None,
+                    min_score=0.0,
+                    tag_func=get_tag):
     #assume that reads occur only once and are in the same order in both files
     #TO DO: add a test for these conditions
     
     for line1,line2 in readpairs:
         assert line1[0] == line2[0]
-        AS1 = [int(x.split(':')[-1]) for x in line1[11:] if 'AS' in x]
-        XS1 = [int(x.split(':')[-1]) for x in line1[11:] if 'XS' in x]
-        AS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'AS' in x]
-        XS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'XS' in x]
+        AS1 = tag_func(line1, tag='AS')
+        XS1 = tag_func(line1, tag='XS')
+        AS2 = tag_func(line2, tag='AS')
+        XS2 = tag_func(line2, tag='XS')
         
         state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
         if state == 'primary_specific':
@@ -175,7 +191,15 @@ def main_single_end(readpairs, primary_specific=sys.stdout, secondary_specific=N
         else: raise RuntimeError('Unexpected state {0} '.format(state))
     pass
 
-def main_paired_end(readpairs, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, min_score=0.0):
+def main_paired_end(readpairs,
+                    primary_specific=sys.stdout,
+                    secondary_specific=None,
+                    primary_multi=None,
+                    secondary_multi=None,
+                    unassigned=None,
+                    unresolved=None,
+                    min_score=0.0,
+                    tag_func=get_tag):
     #assume that paired end reads are sequential in the bam file, occur only once, and are in the same order in both files
     #TO DO: add a test for these conditions
     
@@ -202,14 +226,14 @@ def main_paired_end(readpairs, primary_specific=sys.stdout, secondary_specific=N
             continue
         
         #Get AS and XS tags from all four reads
-        PAS1 = [int(x.split(':')[-1]) for x in previous_line1[11:] if 'AS' in x]
-        PXS1 = [int(x.split(':')[-1]) for x in previous_line1[11:] if 'XS' in x]
-        PAS2 = [int(x.split(':')[-1]) for x in previous_line2[11:] if 'AS' in x]
-        PXS2 = [int(x.split(':')[-1]) for x in previous_line2[11:] if 'XS' in x]
-        AS1 = [int(x.split(':')[-1]) for x in line1[11:] if 'AS' in x]
-        XS1 = [int(x.split(':')[-1]) for x in line1[11:] if 'XS' in x]
-        AS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'AS' in x]
-        XS2 = [int(x.split(':')[-1]) for x in line2[11:] if 'XS' in x]
+        PAS1 = tag_func(previous_line1, tag='AS')
+        PXS1 = tag_func(previous_line1, tag='XS')
+        PAS2 = tag_func(previous_line2, tag='AS')
+        PXS2 = tag_func(previous_line2, tag='XS')
+        AS1 = tag_func(line1, tag='AS')
+        XS1 = tag_func(line1, tag='XS')
+        AS2 = tag_func(line2, tag='AS')
+        XS2 = tag_func(line2, tag='XS')
         
         forward_state = get_mapping_state(PAS1,PXS1,PAS2,PXS2,min_score)
         reverse_state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
