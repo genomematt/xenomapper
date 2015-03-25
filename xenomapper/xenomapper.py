@@ -144,7 +144,7 @@ def get_cigarbased_AS_tag(sam_line,tag='AS'):
     score = (-6 * mismatches) + (-5 * (len(insertions) + len(deletions))) + (-3 * (sum(insertions) + sum(deletions))) + (-2 * sum(softclips))
     return score
 
-def get_mapping_state(AS1,XS1,AS2,XS2, min_score=0.0):
+def get_mapping_state(AS1,XS1,AS2,XS2, min_score=float('-inf')):
     if not ((AS1 and AS1 >= min_score) or \
             (AS2 and AS2 >= min_score)):  #low quality mapping in both
         return 'unassigned'
@@ -171,7 +171,7 @@ def main_single_end(readpairs,
                     secondary_multi=None,
                     unassigned=None,
                     unresolved=None,
-                    min_score=0.0,
+                    min_score=float('-inf'),
                     tag_func=get_tag):
     #assume that reads occur only once and are in the same order in both files
     #TO DO: add a test for these conditions
@@ -213,7 +213,7 @@ def main_paired_end(readpairs,
                     secondary_multi=None,
                     unassigned=None,
                     unresolved=None,
-                    min_score=0.0,
+                    min_score=float('-inf'),
                     tag_func=get_tag):
     #assume that paired end reads are sequential in the bam file, occur only once, and are in the same order in both files
     #TO DO: add a test for these conditions
@@ -357,7 +357,7 @@ def command_line_interface(*args,**kw):
                         help='the SAM files consist of paired reads with forward and reverse reads occuring once and interlaced')
     parser.add_argument('--min_score',
                         type=float,
-                        default=0.0,
+                        default=float('-inf'),
                         help='the minimum mapping score required.  Reads with lower scores will be considered unassigned. \
                               Values should be chosen based on the mapping program and read length (score is as SAM AS field value)')
     parser.add_argument('--cigar_scores',
