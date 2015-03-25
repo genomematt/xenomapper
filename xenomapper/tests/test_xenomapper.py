@@ -9,7 +9,7 @@ Copyright (c) 2012 Matthew Wakefield and The Walter and Eliza Hall Institute. Al
 
 import unittest
 import sys, io
-from xenomapper.xenomapper import process_headers, getReadPairs, main_single_end, main_paired_end
+from xenomapper.xenomapper import process_headers, getReadPairs, main_single_end, main_paired_end, get_mapping_state
 import hashlib
 from pkg_resources import resource_stream
 
@@ -59,6 +59,27 @@ class test_main(unittest.TestCase):
         self.assertEqual(hashlib.sha224(test_primary_specific_outfile.read().encode('latin-1')).hexdigest(),'7b34b93efc8d8eb284fd294534f2ac82a85d41cf39039e477a227f2f')
         sam1.close()
         sam2.close()
+        pass
+        
+    def test_get_mapping_state(self):
+        inpt_and_outpt = [
+                            ((200,199,199,198,0),'primary_specific'),
+                            ((200,200,199,198,0),'primary_multi'),
+                            ((199,198,200,198,0),'secondary_specific'),
+                            ((199,198,200,200,0),'secondary_multi'),
+                            ((float('-inf'),float('-inf'),float('-inf'),float('-inf'),0),'unassigned'),
+                            ((200,199,200,198,0),'unresolved'),
+                            ((200,199,199,199,0),'primary_specific'),
+                            ((200,200,199,199,0),'primary_multi'),
+                            ((199,199,200,199,0),'secondary_specific'),
+                            ((199,199,200,200,0),'secondary_multi'),
+                            ((9,8,8,8,10),'unassigned'),
+                            ((200,200,200,200,0),'unresolved'),
+                            
+        ]
+        
+        for inpt, outpt in inpt_and_outpt:
+            self.assertEqual(get_mapping_state(*inpt),outpt)
         pass
     
 
