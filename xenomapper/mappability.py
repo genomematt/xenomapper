@@ -17,10 +17,10 @@ from collections import Counter
 from xenomapper.xenomapper import get_sam_header
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011,  Matthew Wakefield and The Walter and Eliza Hall Institute"
+__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.4.0"
+__version__ = "0.5.1"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"

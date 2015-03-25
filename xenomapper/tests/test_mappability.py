@@ -13,6 +13,15 @@ from xenomapper.mappability import simulate_reads
 import hashlib
 from pkg_resources import resource_stream
 
+__author__ = "Matthew Wakefield"
+__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
+__credits__ = ["Matthew Wakefield",]
+__license__ = "GPL"
+__version__ = "0.5.1"
+__maintainer__ = "Matthew Wakefield"
+__email__ = "wakefield@wehi.edu.au"
+__status__ = "Development"
+
 class test_mappability(unittest.TestCase):
     def setUp(self):
         pass
