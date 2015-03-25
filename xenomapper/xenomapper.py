@@ -20,6 +20,7 @@ import sys
 import os
 import argparse, textwrap
 import subprocess
+import re
 
 __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
@@ -128,6 +129,20 @@ def get_tag(sam_line,tag='AS'):
     if len(tag_list) > 1:
         raise ValueError('SAM line has multiple values of {0}: {1}'.format(tag,sam_line))
     return float(tag_list[0].split(':')[-1])
+
+def get_cigarbased_AS_tag(sam_line,tag='AS'):
+    if tag != 'AS':
+        return float('-inf')
+    NM = [x for x in sam_line[11:] if tag in x]
+    if not NM:
+        return float('-inf') #either a multimapper or unmapped
+    mismatches = int(NM[0].split(':')[-1])
+    cigar = re.findall(r'([0-9]+)([MIDNSHPX=])',sam_line[5]) 
+    deletions = [int(x[0]) for x in cigar if x[1] == 'D']
+    insertions = [int(x[0]) for x in cigar if x[1] == 'I']
+    softclips = [int(x[0]) for x in cigar if x[1] == 'S']
+    score = (-6 * mismatches) + (-5 * (len(insertions) + len(deletions))) + (-3 * (sum(insertions) + sum(deletions))) + (-2 * sum(softclips))
+    return score
 
 def get_mapping_state(AS1,XS1,AS2,XS2, min_score=0.0):
     if not ((AS1 and AS1 >= min_score) or \
@@ -345,6 +360,12 @@ def command_line_interface(*args,**kw):
                         default=0.0,
                         help='the minimum mapping score required.  Reads with lower scores will be considered unassigned. \
                               Values should be chosen based on the mapping program and read length (score is as SAM AS field value)')
+    parser.add_argument('--cigar_scores',
+                        action='store_true',
+                        help='Use the cigar line and the NM tag to calculate a score. For aligners that do not support the AS tag. \
+                              No determination of multimapping state will be done.  Reads that are unique in one species and multimap \
+                              in the other species may be misassigned as no score can be calculated in the multimapping species. \
+                              Score is -6 * mismatches + -5 * indel open + -3 * indel extend + -2 * softclip.')
     parser.add_argument('--version',
                         action='store_true',
                         help='print version information and exit')
@@ -363,6 +384,8 @@ def command_line_interface(*args,**kw):
 def main():
     args = command_line_interface()
     #print(args, file=sys.stderr)
+    tag_func = get_cigarbased_AS_tag if args.cigar_scores else get_tag
+    
     
     if args.primary_sam:
         process_headers(args.primary_sam,args.secondary_sam,
@@ -395,7 +418,8 @@ def main():
                         secondary_multi=args.secondary_multi,
                         unassigned=args.unassigned,
                         unresolved=args.unresolved,
-                        min_score=args.min_score)
+                        min_score=args.min_score,
+                        tag_func=tag_func)
         
     else:
         main_single_end(readpairs,
@@ -405,7 +429,8 @@ def main():
                         secondary_multi=args.secondary_multi,
                         unassigned=args.unassigned,
                         unresolved=args.unresolved,
-                        min_score=args.min_score)
+                        min_score=args.min_score,
+                        tag_func=tag_func)
     pass
 
 
