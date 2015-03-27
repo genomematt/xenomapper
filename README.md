@@ -101,7 +101,7 @@ To output bam files in a bash shell use process substitution:
 
 xenomappability
 ===============
-xenomappability is a tool for creating mapability wiggle files that reflect the paired end and multi species nature of the final number more accurately than the commonly used single end mapability tracks.
+xenomappability is a tool for creating mappability wiggle files that reflect the paired end and multi species nature of the final number more accurately than the commonly used single end mappability tracks.
 
 This is a beta quality feature and is computationally intensive for useful genomes.  In most cases you will want to segment into chromosomal or smaller regions and calculate on a cluster.
 
