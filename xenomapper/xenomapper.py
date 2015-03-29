@@ -133,7 +133,7 @@ def get_tag(sam_line,tag='AS'):
 def get_cigarbased_AS_tag(sam_line,tag='AS'):
     if tag != 'AS':
         return float('-inf')
-    NM = [x for x in sam_line[11:] if tag in x]
+    NM = [x for x in sam_line[11:] if 'NM' in x]
     if not NM:
         return float('-inf') #either a multimapper or unmapped
     mismatches = int(NM[0].split(':')[-1])
