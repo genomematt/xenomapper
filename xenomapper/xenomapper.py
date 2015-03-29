@@ -26,7 +26,7 @@ __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.5.1"
+__version__ = "0.5.1b2"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -294,10 +294,15 @@ def command_line_interface(*args,**kw):
                     Used for filtering reads where multiple species may contribute 
                     (eg human tissue xenografted into mouse, pathogen growing on plant).
                     
-                    Files must contain an AS and XS score and better matches must have
-                    a higher alignment score.
-                    In practice this is acchieved by using bowtie2 in --local mode.
+                    Files should contain an AS and XS score and better matches must have
+                    a higher alignment score (but can be negative).
+                    Reads must be in the same order in both species.
+                    
+                    In practice this is best acchieved by using Bowtie2 in --local mode.
                     If the -p option is used you must also use --reorder.
+                    
+                    Limited support is provided for aligners that do not produce AS and XS
+                    score tags via the --cigar_score option.
                     
                     All input files must be seekable
                     (ie not a FIFO, process substitution or pipe)'
