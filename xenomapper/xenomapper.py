@@ -146,19 +146,16 @@ def get_cigarbased_AS_tag(sam_line,tag='AS'):
     return score
 
 def get_mapping_state(AS1,XS1,AS2,XS2, min_score=float('-inf')):
-    if not ((AS1 and AS1 >= min_score) or \
-            (AS2 and AS2 >= min_score)):  #low quality mapping in both
+    if AS1 <= min_score and  AS2 <= min_score:  #low quality mapping in both
         return 'unassigned'
-    elif AS1 and (not AS2 or AS1 > AS2): #maps in primary better than secondary
+    elif AS1 > min_score and (AS2 <= min_score or AS1 > AS2): #maps in primary better than secondary
         if not XS1 or AS1 > XS1:       #maps uniquely in primary better than secondary
             return 'primary_specific'
         else:            #multimaps in primary better than secondary
             return 'primary_multi' 
-    elif not AS2 and not AS1:          #does not map in either
-        return 'unassigned'
     elif AS1 == AS2:                   #maps equally well in both
         return 'unresolved'
-    elif AS2 and ((not AS1) or AS2 > AS1): #maps in secondary better than primary
+    elif AS2 > min_score and (AS1 <= min_score or AS2 > AS1): #maps in secondary better than primary
         if (not XS2) or AS2 > XS2:
             return 'secondary_specific'
         else:

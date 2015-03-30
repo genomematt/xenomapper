@@ -67,7 +67,7 @@ class test_main(unittest.TestCase):
                             ((200,200,199,198,float('-inf')),'primary_multi'),
                             ((199,198,200,198,float('-inf')),'secondary_specific'),
                             ((199,198,200,200,float('-inf')),'secondary_multi'),
-                            #((float('-inf'),float('-inf'),float('-inf'),float('-inf'),float('-inf')),'unassigned'), #need to test vs minimum & change to <=
+                            ((float('-inf'),float('-inf'),float('-inf'),float('-inf'),float('-inf')),'unassigned'),
                             ((200,199,200,198,float('-inf')),'unresolved'),
                             ((200,199,199,199,float('-inf')),'primary_specific'),
                             ((200,200,199,199,float('-inf')),'primary_multi'),
