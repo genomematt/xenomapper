@@ -10,7 +10,7 @@ setup(
     author_email='matthew.wakefield@unimelb.edu.au',
     packages=['xenomapper'],
     include_package_data = True,
-    url='https://git@bitbucket.org/genomematt/xenomapper.git',
+    url='https://github.com/genomematt/xenomapper.git',
     license='GPL',
     entry_points={
         'console_scripts': ['xenomapper = xenomapper.xenomapper:main',
