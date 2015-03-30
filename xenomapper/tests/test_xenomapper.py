@@ -9,7 +9,7 @@ Copyright (c) 2012 Matthew Wakefield and The Walter and Eliza Hall Institute. Al
 
 import unittest
 import sys, io
-from xenomapper.xenomapper import process_headers, getReadPairs, main_single_end, main_paired_end, get_mapping_state
+from xenomapper.xenomapper import *
 import hashlib
 from pkg_resources import resource_stream
 
@@ -82,6 +82,24 @@ class test_main(unittest.TestCase):
             self.assertEqual(get_mapping_state(*inpt),outpt)
         pass
     
+    def test_get_cigarbased_AS_tag(self):
+        inpt_and_outpt = [
+                        (['HWI-ST960:63:D0CYJACXX:4:1101:21264:2228', '4', '*', '0', '0', '*', '*', '0', '0', 'TGGTAGTATTGGTTATGGTTCATTGTCCGGAGAGTATATTGTTGAAGAGG', 'BBCBDFDDHHHGFHHIIIIIJIJJJIGJJJGIAF:CFEGHGGHEEEG@HI', 'YT:Z:UU'],
+                        float('-inf')),
+                        (['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0'],0),
+                        (['', '', '', '', '', '1S49M', '', '', '', '', '', 'NM:i:0'],-2),
+                        (['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:2'],-12),
+                        (['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:100', 'XS:i:99'],0),
+                        (['', '', '', '', '', '10M1I39M', '', '', '', '', '', 'NM:i:0'],-8),
+                        (['', '', '', '', '', '10M1D39M', '', '', '', '', '', 'NM:i:0'],-8),
+                        (['', '', '', '', '', '10M2D38M', '', '', '', '', '', 'NM:i:0'],-11),
+                        (['', '', '', '', '', '10M1I10M1D28M', '', '', '', '', '', 'NM:i:0'],-16),
+                        (['', '', '', '', '', '10M1234N40M', '', '', '', '', '', 'NM:i:0'],0),
+                        ]
+        
+        for inpt, outpt in inpt_and_outpt:
+            self.assertEqual(get_cigarbased_AS_tag(inpt),outpt)
+        pass
 
     
 if __name__ == '__main__':
