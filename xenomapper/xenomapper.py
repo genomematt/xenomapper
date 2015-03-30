@@ -21,6 +21,7 @@ import os
 import argparse, textwrap
 import subprocess
 import re
+from collections import Counter
 
 __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
@@ -176,6 +177,8 @@ def main_single_end(readpairs,
     #assume that reads occur only once and are in the same order in both files
     #TO DO: add a test for these conditions
     
+    category_counts = Counter()
+    
     for line1,line2 in readpairs:
         assert line1[0] == line2[0]
         AS1 = tag_func(line1, tag='AS')
@@ -184,6 +187,9 @@ def main_single_end(readpairs,
         XS2 = tag_func(line2, tag='XS')
         
         state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
+        
+        category_counts[state] += 1
+        
         if state == 'primary_specific':
             if primary_specific:
                 print('\t'.join(line1),file=primary_specific)
@@ -204,7 +210,7 @@ def main_single_end(readpairs,
                 print('\t'.join(line1),file=unresolved)
                 print('\t'.join(line2),file=unresolved)
         else: raise RuntimeError('Unexpected state {0} '.format(state))
-    pass
+    return category_counts
 
 def main_paired_end(readpairs,
                     primary_specific=sys.stdout,
@@ -228,7 +234,9 @@ def main_paired_end(readpairs,
     #   both reads multimap to secondary = secondary_multi
     #   one read does not map at all = unassigned (this is a conservative allocation - also puts virus/transgene boundary reads in this file)
     #   one read maps to primary, other read to secondary = unresolved
-
+    
+    category_counts = Counter()
+    
     previous_line1 = []
     previous_line2 = []
     for line1,line2 in readpairs:
@@ -252,6 +260,8 @@ def main_paired_end(readpairs,
         
         forward_state = get_mapping_state(PAS1,PXS1,PAS2,PXS2,min_score)
         reverse_state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
+        
+        category_counts[(forward_state,reverse_state)] += 1
         
         if forward_state == 'primary_specific' or reverse_state == 'primary_specific':
             if primary_specific:
@@ -280,10 +290,11 @@ def main_paired_end(readpairs,
                 print('\t'.join(previous_line1),file=unresolved) 
                 print('\t'.join(line1),file=unresolved)
         else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state))
-
+        
         previous_line1 = line1
         previous_line2 = line2
-    pass
+        
+    return category_counts
 
 def command_line_interface(*args,**kw):
     parser = argparse.ArgumentParser(prog = "xenomapper",
@@ -416,7 +427,7 @@ def main():
         
     
     if args.paired:
-        main_paired_end(readpairs,
+        category_counts = main_paired_end(readpairs,
                         primary_specific=args.primary_specific,
                         secondary_specific=args.secondary_specific,
                         primary_multi=args.primary_multi,
@@ -427,7 +438,7 @@ def main():
                         tag_func=tag_func)
         
     else:
-        main_single_end(readpairs,
+        category_counts = main_single_end(readpairs,
                         primary_specific=args.primary_specific,
                         secondary_specific=args.secondary_specific,
                         primary_multi=args.primary_multi,
@@ -436,6 +447,9 @@ def main():
                         unresolved=args.unresolved,
                         min_score=args.min_score,
                         tag_func=tag_func)
+    
+    print(category_counts, file=sys.stderr)
+    
     pass
 
 
