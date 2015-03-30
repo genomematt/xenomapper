@@ -63,19 +63,24 @@ class test_main(unittest.TestCase):
         
     def test_get_mapping_state(self):
         inpt_and_outpt = [
-                            ((200,199,199,198,0),'primary_specific'),
-                            ((200,200,199,198,0),'primary_multi'),
-                            ((199,198,200,198,0),'secondary_specific'),
-                            ((199,198,200,200,0),'secondary_multi'),
-                            ((float('-inf'),float('-inf'),float('-inf'),float('-inf'),0),'unassigned'),
-                            ((200,199,200,198,0),'unresolved'),
-                            ((200,199,199,199,0),'primary_specific'),
-                            ((200,200,199,199,0),'primary_multi'),
-                            ((199,199,200,199,0),'secondary_specific'),
-                            ((199,199,200,200,0),'secondary_multi'),
+                            ((200,199,199,198,float('-inf')),'primary_specific'),
+                            ((200,200,199,198,float('-inf')),'primary_multi'),
+                            ((199,198,200,198,float('-inf')),'secondary_specific'),
+                            ((199,198,200,200,float('-inf')),'secondary_multi'),
+                            #((float('-inf'),float('-inf'),float('-inf'),float('-inf'),float('-inf')),'unassigned'), #need to test vs minimum & change to <=
+                            ((200,199,200,198,float('-inf')),'unresolved'),
+                            ((200,199,199,199,float('-inf')),'primary_specific'),
+                            ((200,200,199,199,float('-inf')),'primary_multi'),
+                            ((199,199,200,199,float('-inf')),'secondary_specific'),
+                            ((199,199,200,200,float('-inf')),'secondary_multi'),
                             ((9,8,8,8,10),'unassigned'),
-                            ((200,200,200,200,0),'unresolved'),
-                            
+                            ((200,200,200,200,float('-inf')),'unresolved'),
+                            ((-6,float('-inf'),float('-inf'),float('-inf'),float('-inf')),'primary_specific'),
+                            ((float('-inf'),float('-inf'),-6,float('-inf'),float('-inf')),'secondary_specific'),
+                            ((-6,float('-inf'),-2,float('-inf'),float('-inf')),'secondary_specific'),
+                            ((0,float('-inf'),-2,float('-inf'),float('-inf')),'primary_specific'),
+                            ((-2,float('-inf'),0,float('-inf'),float('-inf')),'secondary_specific'),
+                           
         ]
         
         for inpt, outpt in inpt_and_outpt:
