@@ -3,7 +3,7 @@
 Xenomapper
 ==========
 
-Xenomapper is a utility for post processing Bowtie2<sup>1</sup> mapped reads that have been aligned to a primary genome and a secondary genome and binning reads into species specific, multimapping in each species, unmapped and unassigned bins.  It can be used on single end or paired end sequencing data.  In paired end data it is assumed both reads come from the same species and evidence of sequence specificity for either read will be used to assign both reads.
+Xenomapper is a utility for post processing Bowtie2 (Langmead, 2012) mapped reads that have been aligned to a primary genome and a secondary genome and binning reads into species specific, multimapping in each species, unmapped and unassigned bins.  It can be used on single end or paired end sequencing data.  In paired end data it is assumed both reads come from the same species and evidence of sequence specificity for either read will be used to assign both reads.
 
 Use cases include xenografts of human cancers in mouse and host pathogen interactions.
 
@@ -40,72 +40,72 @@ usage:
 					  [--cigar_scores]
                       [--version]
 
-A script for parsing pairs of sam files and returning sam files
-containing only reads where no better mapping exist in other files.
-Used for filtering reads where multiple species may contribute 
-(eg human tissue xenografted into mouse, pathogen growing on plant).
+	A script for parsing pairs of sam files and returning sam files
+	containing only reads where no better mapping exist in other files.
+	Used for filtering reads where multiple species may contribute 
+	(eg human tissue xenografted into mouse, pathogen growing on plant).
 
-Files should contain an AS and XS score and better matches must have
-a higher alignment score (but can be negative).
-Reads must be in the same order in both species.
+	Files should contain an AS and XS score and better matches must have
+	a higher alignment score (but can be negative).
+	Reads must be in the same order in both species.
 
-In practice this is best acchieved by using Bowtie2 in --local mode.
-If the -p option is used you must also use --reorder.
+	In practice this is best acchieved by using Bowtie2 in --local mode.
+	If the -p option is used you must also use --reorder.
 
-Limited support is provided for aligners that do not produce AS and XS
-score tags via the --cigar_score option.
+	Limited support is provided for aligners that do not produce AS and XS
+	score tags via the --cigar_score option.
 
-All input files must be seekable
-(ie not a FIFO, process substitution or pipe)'
+	All input files must be seekable
+	(ie not a FIFO, process substitution or pipe)'
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --primary_sam PRIMARY_SAM
-                        a SAM format Bowtie2 mapping output file corrisponding
-                        to the primary species of interest
-  --secondary_sam SECONDARY_SAM
-                        a SAM format Bowtie2 mapping output file corrisponding
-                        to the secondary or contaminating species
-  --primary_bam PRIMARY_BAM
-                        a BAM format Bowtie2 mapping output file corrisponding
-                        to the primary species of interest
-  --secondary_bam SECONDARY_BAM
-                        a BAM format Bowtie2 mapping output file corrisponding
-                        to the secondary or contaminating species
-  --primary_specific PRIMARY_SPECIFIC
-                        name for SAM format output file for reads mapping to a
-                        specific location in the primary species
-  --secondary_specific SECONDARY_SPECIFIC
-                        name for SAM format output file for reads mapping to a
-                        specific location in the secondary species
-  --primary_multi PRIMARY_MULTI
-                        name for SAM format output file for reads multi
-                        mapping in the primary species
-  --secondary_multi SECONDARY_MULTI
-                        name for SAM format output file for reads multi
-                        mapping in the secondary species
-  --unassigned UNASSIGNED
-                        name for SAM format output file for unassigned (non-
-                        mapping) reads
-  --unresolved UNRESOLVED
-                        name for SAM format output file for unresolved (maps
-                        equally well in both species) reads
-  --paired              the SAM files consist of paired reads with forward and
-                        reverse reads occuring once and interlaced
-  --min_score MIN_SCORE
-                        the minimum mapping score required. Reads with lower
-                        scores will be considered unassigned. Values should be
-                        chosen based on the mapping program and read length
-                        (score is as SAM AS field value)
-  --cigar_scores        Use the cigar line and the NM tag to calculate a
-                        score. For aligners that do not support the AS tag. No
-                        determination of multimapping state will be done.
-                        Reads that are unique in one species and multimap in
-                        the other species may be misassigned as no score can
-                        be calculated in the multimapping species. Score is -6
-                        * mismatches + -5 * indel open + -3 * indel extend +
-                        -2 * softclip.
-  --version             print version information and exit
+	optional arguments:
+	  -h, --help            show this help message and exit
+	  --primary_sam PRIMARY_SAM
+	                        a SAM format Bowtie2 mapping output file corrisponding
+	                        to the primary species of interest
+	  --secondary_sam SECONDARY_SAM
+	                        a SAM format Bowtie2 mapping output file corrisponding
+	                        to the secondary or contaminating species
+	  --primary_bam PRIMARY_BAM
+	                        a BAM format Bowtie2 mapping output file corrisponding
+	                        to the primary species of interest
+	  --secondary_bam SECONDARY_BAM
+	                        a BAM format Bowtie2 mapping output file corrisponding
+	                        to the secondary or contaminating species
+	  --primary_specific PRIMARY_SPECIFIC
+	                        name for SAM format output file for reads mapping to a
+	                        specific location in the primary species
+	  --secondary_specific SECONDARY_SPECIFIC
+	                        name for SAM format output file for reads mapping to a
+	                        specific location in the secondary species
+	  --primary_multi PRIMARY_MULTI
+	                        name for SAM format output file for reads multi
+	                        mapping in the primary species
+	  --secondary_multi SECONDARY_MULTI
+	                        name for SAM format output file for reads multi
+	                        mapping in the secondary species
+	  --unassigned UNASSIGNED
+	                        name for SAM format output file for unassigned (non-
+	                        mapping) reads
+	  --unresolved UNRESOLVED
+	                        name for SAM format output file for unresolved (maps
+	                        equally well in both species) reads
+	  --paired              the SAM files consist of paired reads with forward and
+	                        reverse reads occuring once and interlaced
+	  --min_score MIN_SCORE
+	                        the minimum mapping score required. Reads with lower
+	                        scores will be considered unassigned. Values should be
+	                        chosen based on the mapping program and read length
+	                        (score is as SAM AS field value)
+	  --cigar_scores        Use the cigar line and the NM tag to calculate a
+	                        score. For aligners that do not support the AS tag. No
+	                        determination of multimapping state will be done.
+	                        Reads that are unique in one species and multimap in
+	                        the other species may be misassigned as no score can
+	                        be calculated in the multimapping species. Score is -6
+	                        * mismatches + -5 * indel open + -3 * indel extend +
+	                        -2 * softclip.
+	  --version             print version information and exit
 
 
 To output bam files in a bash shell use process substitution:
@@ -135,5 +135,5 @@ Currently Xenomapper is unpublished, but this repository does have a DOI identif
 
 References
 =================
-<sup>1</sup> Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012, 9:357-359. http://bowtie-bio.sourceforge.net/bowtie2/
+Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012, 9:357-359. http://bowtie-bio.sourceforge.net/bowtie2/
 
