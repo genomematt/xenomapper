@@ -445,7 +445,10 @@ def main():
                         min_score=args.min_score,
                         tag_func=tag_func)
     
-    print(category_counts, file=sys.stderr)
+    print('-'*80, file=sys.stderr)
+    print('Read Count Category Summary', file=sys.stderr)
+    for category, cat_count in category_counts:
+        print('  {:25s}:{12d}'.format(category,cat_count), file=sys.stderr)
     
     pass
 
