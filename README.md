@@ -18,7 +18,7 @@ Xenomapper requires python 3.4 or higher and is tested on linux and MacOS.  For 
     pip3 install xenomapper
     python3 -m xenomapper.tests.test_all
 
-All users should upgrade to v0.5.0
+All users should upgrade to v0.5.0 or higher
 
 Using Xenomapper
 ================
@@ -93,10 +93,10 @@ usage:
 	  --paired              the SAM files consist of paired reads with forward and
 	                        reverse reads occuring once and interlaced
 	  --min_score MIN_SCORE
-	                        the minimum mapping score required. Reads with lower
-	                        scores will be considered unassigned. Values should be
-	                        chosen based on the mapping program and read length
-	                        (score is as SAM AS field value)
+							the minimum mapping score.  Reads with scores less than
+							or equal to min_score will be considered unassigned.
+							Values should be chosen based on the mapping program 
+							and read length
 	  --cigar_scores        Use the cigar line and the NM tag to calculate a
 	                        score. For aligners that do not support the AS tag. No
 	                        determination of multimapping state will be done.

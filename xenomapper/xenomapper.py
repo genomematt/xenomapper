@@ -371,8 +371,8 @@ def command_line_interface(*args,**kw):
     parser.add_argument('--min_score',
                         type=float,
                         default=float('-inf'),
-                        help='the minimum mapping score required.  Reads with lower scores will be considered unassigned. \
-                              Values should be chosen based on the mapping program and read length (score is as SAM AS field value)')
+                        help='the minimum mapping score.  Reads with scores less than or equal to min_score will be considered unassigned. \
+                              Values should be chosen based on the mapping program and read length')
     parser.add_argument('--cigar_scores',
                         action='store_true',
                         help='Use the cigar line and the NM tag to calculate a score. For aligners that do not support the AS tag. \
