@@ -43,14 +43,12 @@ class test_main(unittest.TestCase):
                      unresolved=test_unresolved_outfile,
                      unassigned=test_unassigned_outfile,
                      )
-        print(len(test_primary_specific_outfile.getvalue()),0)
-        print(len(test_secondary_specific_outfile.getvalue()),0)
-        print(len(test_primary_multi_outfile.getvalue()),0)
-        print(len(test_secondary_multi_outfile.getvalue()),0)
-        print(len(test_unassigned_outfile.getvalue()),0)
-        print(len(test_unresolved_outfile.getvalue()),0)
-
-
+        self.assertEqual(len(test_primary_specific_outfile.getvalue()),697)
+        self.assertEqual(len(test_secondary_specific_outfile.getvalue()),631)
+        self.assertEqual(len(test_primary_multi_outfile.getvalue()),710)
+        self.assertEqual(len(test_secondary_multi_outfile.getvalue()),644)
+        self.assertEqual(len(test_unassigned_outfile.getvalue()),707)
+        self.assertEqual(len(test_unresolved_outfile.getvalue()),707)
         sam1.close()
         sam2.close()
         pass
@@ -162,6 +160,18 @@ class test_main(unittest.TestCase):
             self.assertEqual(get_mapping_state(*inpt),outpt)
         pass
     
+    def test_get_tag(self):
+        inpt_and_outpt = [
+                        ((['HWI-ST960:63:D0CYJACXX:4:1101:21264:2228', '4', '*', '0', '0', '*', '*', '0', '0', 'TGGTAGTATTGGTTATGGTTCATTGTCCGGAGAGTATATTGTTGAAGAGG', 'BBCBDFDDHHHGFHHIIIIIJIJJJIGJJJGIAF:CFEGHGGHEEEG@HI', 'YT:Z:UU'],'AS'),
+                        float('-inf')),
+                        ((['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:101', 'XS:i:99'],'AS'),101),
+                        ((['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:100', 'XS:i:99'],'XS'),99),
+                        ((['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:100', 'XS:i:99'],'NM'),0),
+                        ]
+        for inpt, outpt in inpt_and_outpt:
+            self.assertEqual(get_tag(*inpt),outpt)
+        pass
+        
     def test_get_cigarbased_AS_tag(self):
         inpt_and_outpt = [
                         (['HWI-ST960:63:D0CYJACXX:4:1101:21264:2228', '4', '*', '0', '0', '*', '*', '0', '0', 'TGGTAGTATTGGTTATGGTTCATTGTCCGGAGAGTATATTGTTGAAGAGG', 'BBCBDFDDHHHGFHHIIIIIJIJJJIGJJJGIAF:CFEGHGGHEEEG@HI', 'YT:Z:UU'],
