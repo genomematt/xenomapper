@@ -25,6 +25,36 @@ __status__ = "Development"
 class test_main(unittest.TestCase):
     def setUp(self):
         pass
+    
+    def test_process_headers(self):
+        test_primary_specific_outfile = io.StringIO()
+        test_secondary_specific_outfile = io.StringIO()
+        test_primary_multi_outfile = io.StringIO()
+        test_secondary_multi_outfile = io.StringIO()
+        test_unassigned_outfile = io.StringIO()
+        test_unresolved_outfile = io.StringIO()
+        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
+        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
+        process_headers(sam1,sam2,
+                     primary_specific=test_primary_specific_outfile,
+                     secondary_specific=test_secondary_specific_outfile,
+                     primary_multi=test_primary_multi_outfile,
+                     secondary_multi=test_secondary_multi_outfile,
+                     unresolved=test_unresolved_outfile,
+                     unassigned=test_unassigned_outfile,
+                     )
+        print(len(test_primary_specific_outfile.getvalue()),0)
+        print(len(test_secondary_specific_outfile.getvalue()),0)
+        print(len(test_primary_multi_outfile.getvalue()),0)
+        print(len(test_secondary_multi_outfile.getvalue()),0)
+        print(len(test_unassigned_outfile.getvalue()),0)
+        print(len(test_unresolved_outfile.getvalue()),0)
+
+
+        sam1.close()
+        sam2.close()
+        pass
+
     def test_consistent_output_SE(self):
         test_primary_specific_outfile = io.StringIO()
         test_secondary_specific_outfile = io.StringIO()
@@ -37,8 +67,7 @@ class test_main(unittest.TestCase):
         sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/test_human_in.sam'))
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
         main_single_end(getReadPairs(sam1,sam2), primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
-        test_primary_specific_outfile.seek(0)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.read().encode('latin-1')).hexdigest(),'f251316f5737d0bc4496ef4e695b14f553daef379dd5e7c6b456fdcf')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'4951dcd9bde5c24ee1c94ce49da6e910efcf1721c04af71a0e1127df')
         sam1.close()
         sam2.close()
         pass
@@ -49,17 +78,63 @@ class test_main(unittest.TestCase):
         test_primary_multi_outfile = io.StringIO()
         test_secondary_multi_outfile = io.StringIO()
         test_unassigned_outfile = io.StringIO()
-        #sam1 = open('paired_end_testdata_human.sam','r')
-        #sam2 = open('paired_end_testdata_mouse.sam','r')
+        test_unresolved_outfile = io.StringIO()
         sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
         sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
-        main_paired_end(getReadPairs(sam1,sam2), primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
-        test_primary_specific_outfile.seek(0)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.read().encode('latin-1')).hexdigest(),'7b34b93efc8d8eb284fd294534f2ac82a85d41cf39039e477a227f2f')
+        cat_counts = main_paired_end(getReadPairs(sam1,sam2),                                                 primary_specific=test_primary_specific_outfile,
+                                                 secondary_specific=test_secondary_specific_outfile,
+                                                 primary_multi=test_primary_multi_outfile,
+                                                 secondary_multi=test_secondary_multi_outfile,
+                                                 unresolved=test_unresolved_outfile,
+                                                 unassigned=test_unassigned_outfile,
+                                                 )
+        self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'primary_specific' in x])*2,
+                         len(test_primary_specific_outfile.getvalue().split('\n'))-30) #29 lines of header in this file
+        self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'secondary_specific' in x and not 'primary_specific' in x])*2,
+                         len(test_secondary_specific_outfile.getvalue().split('\n'))-27) #26 lines of header in this file
+        self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'primary_multi' in x and not 'primary_specific' in x and not 'secondary_specific' in x])*2,
+                        len(test_primary_multi_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'secondary_multi' in x \
+                        and not 'primary_multi' in x and not 'primary_specific' in x and not 'secondary_specific' in x])*2,
+                        len(test_secondary_multi_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'008c48f9952df7e9b8ab89d5d90fb2f75aa3ff0c882bbf506e0df07f')
         sam1.close()
         sam2.close()
         pass
+
+    def test_consistent_output_conservative_PE(self):
+        test_primary_specific_outfile = io.StringIO()
+        test_secondary_specific_outfile = io.StringIO()
+        test_primary_multi_outfile = io.StringIO()
+        test_secondary_multi_outfile = io.StringIO()
+        test_unassigned_outfile = io.StringIO()
+        test_unresolved_outfile = io.StringIO()
+        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
+        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
+        process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
+        cat_counts = conservative_main_paired_end(getReadPairs(sam1,sam2),
+                                                 primary_specific=test_primary_specific_outfile,
+                                                 secondary_specific=test_secondary_specific_outfile,
+                                                 primary_multi=test_primary_multi_outfile,
+                                                 secondary_multi=test_secondary_multi_outfile,
+                                                 unresolved=test_unresolved_outfile,
+                                                 unassigned=test_unassigned_outfile,
+                                                 )
+        self.assertEqual(cat_counts[('primary_specific', 'secondary_specific')]*4, len(test_unresolved_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(cat_counts[('primary_multi', 'primary_multi')]*2, len(test_primary_multi_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(cat_counts[('secondary_multi', 'secondary_multi')]*2, len(test_secondary_multi_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(cat_counts[('primary_specific', 'primary_specific')]*2 + cat_counts[('primary_specific', 'primary_multi')]*2 + cat_counts[('primary_multi', 'primary_specific')]*2,
+                         len(test_primary_specific_outfile.getvalue().split('\n'))-30) #29 lines of header in this file
+        self.assertEqual(cat_counts[('secondary_specific', 'secondary_specific')]*2 + cat_counts[('secondary_specific', 'secondary_multi')]*2 + cat_counts[('secondary_multi', 'secondary_specific')]*2,
+                         len(test_secondary_specific_outfile.getvalue().split('\n'))-27)  #26 lines of header in this file
+        self.assertEqual(cat_counts[('unassigned', 'unassigned')]*4, len(test_unassigned_outfile.getvalue().split('\n'))-1)
+        
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'d8b01c0d83732ec3f53fe0418741887f264d061275962000a08c2b7b')
+        sam1.close()
+        sam2.close()
+        pass
+
         
     def test_get_mapping_state(self):
         inpt_and_outpt = [

@@ -22,6 +22,7 @@ import argparse, textwrap
 import subprocess
 import re
 from collections import Counter
+from copy import copy
 
 __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
@@ -121,6 +122,19 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
             line2= sam2.readline().strip('\n').split()
     pass
 
+def add_pg_tag(sam_header_list,comment=None):
+    new_header = copy(sam_header_list)
+    if not [x[0] for x in new_header] == ['@',]*len(new_header):
+        raise ValueError('Incorrect SAM header format :\n{0}'.format('\n'.join(new_header)))
+    if new_header[-1][:3] == '@PG':
+        PP = 'PP'+[x for x in new_header[-1].split() if x[:2] == 'ID'][0][2:]+'\t'
+    else:
+        PP = ''
+    new_header.append('@PG\tID:Xenomapper\tPN:Xenomapper\t'+PP+'VN:{0}'.format(__version__))
+    if comment:
+        new_header.append('@CO '+comment)
+    return new_header
+
 def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, bam=False):
     """Process headers from two sam or bam files and write appropriate
     header information to the correct output files
@@ -137,19 +151,31 @@ def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific
         samheader1 = get_bam_header(file1)
         samheader2 = get_bam_header(file2)
     else:
-        samheader1 = "\n".join(get_sam_header(file1))
-        samheader2 = "\n".join(get_sam_header(file2))
-    print(samheader1, file=primary_specific)
+        samheader1 = get_sam_header(file1)
+        samheader2 = get_sam_header(file2)
+    print('\n'.join(add_pg_tag(samheader1,
+                    comment='species specific reads'
+                    )), file=primary_specific)
     if secondary_specific:
-        print(samheader2, file=secondary_specific)
+        print('\n'.join(add_pg_tag(samheader2,
+                    comment='species specific reads'
+                    )), file=secondary_specific)
     if primary_multi:
-        print(samheader1, file=primary_multi)
+        print('\n'.join(add_pg_tag(samheader1,
+                    comment='species specific multimapping reads'
+                    )), file=primary_multi)
     if secondary_multi:
-        print(samheader2, file=secondary_multi)
+        print('\n'.join(add_pg_tag(samheader2,
+                    comment='species specific multimapping reads'
+                    )), file=secondary_multi)
     if unassigned:
-        print(samheader1, file=unassigned)
+        print('\n'.join(add_pg_tag(samheader1,
+                    comment='reads that could not be assigned'
+                    )), file=unassigned)
     if unresolved: #This will not be the correct header - Look into merging header 1 and 2
-        print(samheader1, file=unresolved)
+        print('\n'.join(add_pg_tag(samheader1,
+                    comment='reads that could not be resolved'
+                    )), file=unresolved)
     pass
 
 def get_tag(sam_line,tag='AS'):
