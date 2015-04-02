@@ -44,7 +44,7 @@ def get_sam_header(samfile):
     samfile.seek(pointer) #set file to first line after header
     return header
 
-def get_bam_header(bamfile):
+def get_bam_header(bamfile): #pragma: no cover #not tested due to need for samtools
     p = subprocess.Popen('samtools view -H -',stdin=bamfile,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
     header = []
     for line in p.stdout:
@@ -57,13 +57,24 @@ def get_bam_header(bamfile):
 
 #['HWI-ST960:63:D0CYJACXX:4:1101:6951:2219', '0', '9', '20953017', '44', '49M1S', '*', '0', '0', 'GNTTTATTGGAGCAGCTATTGGCTTCTTCATTGCAGGAGGAAAAAAAGGT', '@#1ADDDFFHFFHIJIJJIJIJJJJ?EH@@FFFGIII@GHCHIIJJI@F8', 'AS:i:87', 'XN:i:0', 'XM:i:2', 'XO:i:0', 'XG:i:0', 'NM:i:2', 'MD:Z:1T30A16', 'YT:Z:UU\n']
 
-def bam_lines(f):
+def bam_lines(f): #pragma: no cover #not tested due to need for samtools
+    """Use samtools in a subprocess to yield lines of sam from a bam file
+        Arguments: a file or file like object in bam format
+        Yields:    ascii sam file lines
+    """
     p = subprocess.Popen('samtools view -',stdin=f,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
     header_lines = []
     for line in p.stdout:
         yield line.decode('ascii')
 
-def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False):
+def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False): #pragma: no cover #not tested due to need for samtools
+    """Process two bamfiles to yield the equivalent line from each file
+        Arguments: 
+        bamfile1, bamfile2  - file or file like objects in binary bam format
+                              containing the same reads in the same order
+                              mapped in two different species
+        Yields:    a tuple of lists of sam fields split on white space
+    """
     bam1 = bam_lines(bamfile1)
     bam2 = bam_lines(bamfile2)
     line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
@@ -85,6 +96,13 @@ def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False):
     pass
 
 def getReadPairs(sam1,sam2, skip_repeated_reads=False):
+    """Process two sam files to yield the equivalent line from each file
+        Arguments: 
+        sam1, sam2  - file or file like objects in ascii sam format
+                      containing the same reads in the same order
+                      mapped in two different species
+        Yields:    a tuple of lists of sam fields split on white space
+    """
     line1= sam1.readline().strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
     line2= sam2.readline().strip('\n').split()
     while line1 and line2 and line1 !=[''] and line2 !=['']:
@@ -93,7 +111,7 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
         yield line1,line2
         previous_read1 = line1[0]
         previous_read2 = line2[0]
-        if skip_repeated_reads:
+        if skip_repeated_reads: #pragma: no cover
             while line1 and line2 and line1 !=[''] and line2 !=[''] and line1[0] == previous_read1:
                 line1= sam1.readline().strip('\n').split()
             while line1 and line2 and line1 !=[''] and line2 !=[''] and line2[0] == previous_read2:
@@ -104,9 +122,20 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
     pass
 
 def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, bam=False):
-    if bam:
-        samheader1 = "\n".join(get_bam_header(file1))
-        samheader2 = "\n".join(get_bam_header(file2))
+    """Process headers from two sam or bam files and write appropriate
+    header information to the correct output files
+        Arguments: 
+        file1, file2  - file or file like objects in binary bam format
+                        or ascii sam format
+        primary_specific, secondary_specific, primary_multi,
+        secondary_multi, unassigned, unresolved
+                      - ascii file or file like objects for outputs
+        bam           - Boolean flag indicating file1 & file2 are
+                        in binary bam format.  Default = False
+    """
+    if bam: #pragma: no cover
+        samheader1 = get_bam_header(file1)
+        samheader2 = get_bam_header(file2)
     else:
         samheader1 = "\n".join(get_sam_header(file1))
         samheader2 = "\n".join(get_sam_header(file2))
@@ -124,6 +153,15 @@ def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific
     pass
 
 def get_tag(sam_line,tag='AS'):
+    """Return the value of a SAM tag field
+    Arguments:
+        sam_line  - list of elements from a SAM file line
+        tag       - the name of the optional tag to be returned
+                    Only suitable for numeric tags eg AS or XS
+    Returns
+        tag_value - the value of the SAM tag converted to a float
+                    or -inf if tag is not present.
+    """
     tag_list = [x for x in sam_line[11:] if tag in x]
     if not tag_list:
         return float('-inf') #this will always be worse than any bowtie score
@@ -131,7 +169,43 @@ def get_tag(sam_line,tag='AS'):
         raise ValueError('SAM line has multiple values of {0}: {1}'.format(tag,sam_line))
     return float(tag_list[0].split(':')[-1])
 
+#def alternative_get_tag(sam_line,tag='AS'):
+#    """Dummy code example for overriding get_tag to support
+#    aligners that produce a useful score but store it in an
+#    alternive tag. Our hypothetical aligner uses ZS for
+#    match score and ZM for next highest hit.
+#    """
+#    if tag == 'AS':
+#        other_tag = 'ZS'
+#    elif tag == 'XS':
+#        other_tag = 'ZM'
+#    else:
+#        return get_tag(sam_line,tag)
+#    tag_list = [x for x in sam_line[11:] if other_tag in x]
+#    if not tag_list:
+#        return float('-inf') #this will always be worse than any bowtie score
+#    if len(tag_list) > 1:
+#        raise ValueError('SAM line has multiple values of {0}: {1}'.format(other_tag,sam_line))
+#    return float(tag_list[0].split(':')[-1])
+
+
 def get_cigarbased_AS_tag(sam_line,tag='AS'):
+    """Return calculated values for a score equivalent to a
+    rescaled AS tag using the cigar line and NM tags from the
+    SAM entry.
+    Score is rescaled such that a perfect match for the full
+    length of the read acchieves a score of 0.0.
+    Penalties are: mismatch -6, gap open -5, gap extend -3,
+                   softclipped -2 (equiv to +2 match rescaled)
+    Arguments:
+        sam_line  - list of elements from a SAM file line
+        tag       - the name of the optional tag to be emulated
+                    Only AS tags will be calculated
+    Returns
+        tag_value - the calculated value of the AS score as a
+                    float or the return value of get_tag for
+                    all other values of tag
+    """
     if tag != 'AS':
         return get_tag(sam_line,tag)
     NM = [x for x in sam_line[11:] if 'NM' in x]
@@ -146,6 +220,22 @@ def get_cigarbased_AS_tag(sam_line,tag='AS'):
     return score
 
 def get_mapping_state(AS1,XS1,AS2,XS2, min_score=float('-inf')):
+    """Determine the mapping state based on scores in each species.
+    Scores can be negative but better matches must have higher scores
+    Arguments:
+        AS1  - float or interger score of best match in primary species
+        XS1  - float or interger score of other match in primary species
+        AS2  - float or interger score of best match in secondary species
+        XS2  - float or interger score of other match in secondary species
+        min_score - the score that matches must exceed in order to be
+                    considered valid matches. Note scores equalling this
+                    value will also be considered not to match.
+                    Default = -inf
+    Returns
+        state - a string of 'primary_specific', 'secondary_specific',
+                'primary_multi', 'secondary_multi',
+                'unresolved', or 'unassigned' indicating match state.
+    """
     if AS1 <= min_score and  AS2 <= min_score:  #low quality mapping in both
         return 'unassigned'
     elif AS1 > min_score and (AS2 <= min_score or AS1 > AS2): #maps in primary better than secondary
@@ -160,7 +250,7 @@ def get_mapping_state(AS1,XS1,AS2,XS2, min_score=float('-inf')):
             return 'secondary_specific'
         else:
             return 'secondary_multi' #multimaps in secondary better than primary
-    else: raise RuntimeError('Error in processing logic with values {0} '.format((AS1,XS1,AS2,XS2)))
+    else: raise RuntimeError('Error in processing logic with values {0} '.format((AS1,XS1,AS2,XS2))) # pragma: no cover
 
 def main_single_end(readpairs,
                     primary_specific=sys.stdout,
@@ -171,6 +261,23 @@ def main_single_end(readpairs,
                     unresolved=None,
                     min_score=float('-inf'),
                     tag_func=get_tag):
+    """Main loop for processing single end read files
+    Arguments:
+        readpairs - an iterable of tuples of lists of sam fields
+        primary_specific, secondary_specific, primary_multi,
+        secondary_multi, unassigned, unresolved
+                  - ascii file or file like objects for outputs
+        min_score - the score that matches must exceed in order to be
+                    considered valid matches. Note scores equalling this
+                    value will also be considered not to match.
+                    Default = -inf
+        tag_func  - a function that takes a list of sam fields and a
+                    tag identifier (at least 'AS' and 'XS')
+                    returns a numeric value for that tag
+    Returns:
+        category_counts - a dictionary keyed by category containing
+                    occurance counts
+    """
     #assume that reads occur only once and are in the same order in both files
     #TO DO: add a test for these conditions
     
@@ -206,7 +313,7 @@ def main_single_end(readpairs,
             if unresolved:
                 print('\t'.join(line1),file=unresolved)
                 print('\t'.join(line2),file=unresolved)
-        else: raise RuntimeError('Unexpected state {0} '.format(state))
+        else: raise RuntimeError('Unexpected state {0} '.format(state)) # pragma: no cover
     return category_counts
 
 def main_paired_end(readpairs,
@@ -378,7 +485,9 @@ def command_line_interface(*args,**kw):
                         help='Use the cigar line and the NM tag to calculate a score. For aligners that do not support the AS tag. \
                               No determination of multimapping state will be done.  Reads that are unique in one species and multimap \
                               in the other species may be misassigned as no score can be calculated in the multimapping species. \
-                              Score is -6 * mismatches + -5 * indel open + -3 * indel extend + -2 * softclip.')
+                              Score is -6 * mismatches + -5 * indel open + -3 * indel extend + -2 * softclip. \
+                              Treatment of multimappers will vary with aligner.  If multimappers are assigned a cigar line they \
+                              will be treated as species specific, otherwise as unassigned.')
     parser.add_argument('--version',
                         action='store_true',
                         help='print version information and exit')
