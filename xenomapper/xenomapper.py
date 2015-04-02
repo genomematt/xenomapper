@@ -325,19 +325,36 @@ def main_paired_end(readpairs,
                     unresolved=None,
                     min_score=float('-inf'),
                     tag_func=get_tag):
-    #assume that paired end reads are sequential in the bam file, occur only once, and are in the same order in both files
-    #TO DO: add a test for these conditions
+    """Liberal main loop for processing paired end read files.
+    Discordant reads will be assigned to the highest
+    priority category in the order: primary_specific,
+    secondary_specific, primary_multi, secondary_multi,
+    unresolved, unassigned
     
-    #Potential states:
-    #   pair maps uniquely to primary = primary_specific
-    #   pair maps uniquely to secondary = secondary_specific
-    #   #Note: do not currently require mapping as a pair - just need both ends to single end map
-    #   one read multimaps to primary and second read maps uniquely to primary = primary_specific
-    #   one read multimaps to secondary and second read maps uniquely to secondary = secondary_specific
-    #   both reads multimap to primary = primary_multi
-    #   both reads multimap to secondary = secondary_multi
-    #   one read does not map at all = unassigned (this is a conservative allocation - also puts virus/transgene boundary reads in this file)
-    #   one read maps to primary, other read to secondary = unresolved
+    This will rescue unresolved or unassigned reads where the second read 
+    can be assigned, and deems primary/secondary discordant reads as
+    primary.
+    
+    Paired end reads must be sequential in the sam or bam file,
+    occur only once and be in the same order in both files.
+    
+    Arguments:
+        readpairs - an iterable of tuples of lists of sam fields
+        primary_specific, secondary_specific, primary_multi,
+        secondary_multi, unassigned, unresolved
+                  - ascii file or file like objects for outputs
+        min_score - the score that matches must exceed in order to be
+                    considered valid matches. Note scores equalling this
+                    value will also be considered not to match.
+                    Default = -inf
+        tag_func  - a function that takes a list of sam fields and a
+                    tag identifier (at least 'AS' and 'XS')
+                    returns a numeric value for that tag
+    Returns:
+        category_counts - a dictionary keyed by a tuple of forward
+                    and reverse read category containing
+                    occurance counts
+    """
     
     category_counts = Counter()
     
@@ -393,7 +410,120 @@ def main_paired_end(readpairs,
             if unassigned:
                 print('\t'.join(previous_line1),file=unresolved) 
                 print('\t'.join(line1),file=unresolved)
-        else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state))
+        else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state)) # pragma: no cover
+        
+        previous_line1 = line1
+        previous_line2 = line2
+        
+    return category_counts
+
+def conservative_main_paired_end(readpairs,
+                    primary_specific=sys.stdout,
+                    secondary_specific=None,
+                    primary_multi=None,
+                    secondary_multi=None,
+                    unassigned=None,
+                    unresolved=None,
+                    min_score=float('-inf'),
+                    tag_func=get_tag):
+    """Main loop for conservative processing of paired end read files.
+    Read pairs where either read is unassigned will be deemed unassigned.
+    This places features such as transgene boundaries in the unassigned file.
+    Reads with discordant species will be unresolved. 
+    Concordant reads will be assigned to the highest priority category in the 
+    order: primary_specific, secondary_specific, primary_multi, 
+    secondary_multi, unresolved, unassigned
+    
+    Paired end reads must be sequential in the sam or bam file, occur only once
+    and be in the same order in both files.
+    
+    Arguments:
+        readpairs - an iterable of tuples of lists of sam fields
+        primary_specific, secondary_specific, primary_multi,
+        secondary_multi, unassigned, unresolved
+                  - ascii file or file like objects for outputs
+        min_score - the score that matches must exceed in order to be
+                    considered valid matches. Note scores equalling this
+                    value will also be considered not to match.
+                    Default = -inf
+        tag_func  - a function that takes a list of sam fields and a
+                    tag identifier (at least 'AS' and 'XS')
+                    returns a numeric value for that tag
+    Returns:
+        category_counts - a dictionary keyed by a tuple of forward
+                    and reverse read category containing
+                    occurance counts
+    """
+    
+    #Potential states:
+    #   pair maps uniquely to primary = primary_specific
+    #   pair maps uniquely to secondary = secondary_specific
+    #   #Note: do not currently require mapping as a pair - just need both ends to single end map
+    #   one read multimaps to primary and second read maps uniquely to primary = primary_specific
+    #   one read multimaps to secondary and second read maps uniquely to secondary = secondary_specific
+    #   both reads multimap to primary = primary_multi
+    #   both reads multimap to secondary = secondary_multi
+    #   one read does not map at all = unassigned (this is a conservative allocation - also puts virus/transgene boundary reads in this file)
+    #   one read maps to primary, other read to secondary = unresolved
+    
+    category_counts = Counter()
+    
+    previous_line1 = []
+    previous_line2 = []
+    for line1,line2 in readpairs:
+        assert line1[0] == line2[0]
+        
+        #Test to see if line1 is pair of previous_line1 - if not skip ahead to next readpair
+        if not previous_line1 or not line1 or not previous_line1[0] == line1[0]:
+            previous_line1 = line1
+            previous_line2 = line2
+            continue
+        
+        #Get AS and XS tags from all four reads
+        PAS1 = tag_func(previous_line1, tag='AS')
+        PXS1 = tag_func(previous_line1, tag='XS')
+        PAS2 = tag_func(previous_line2, tag='AS')
+        PXS2 = tag_func(previous_line2, tag='XS')
+        AS1 = tag_func(line1, tag='AS')
+        XS1 = tag_func(line1, tag='XS')
+        AS2 = tag_func(line2, tag='AS')
+        XS2 = tag_func(line2, tag='XS')
+        
+        forward_state = get_mapping_state(PAS1,PXS1,PAS2,PXS2,min_score)
+        reverse_state = get_mapping_state(AS1,XS1,AS2,XS2,min_score)
+        
+        category_counts[(forward_state,reverse_state)] += 1
+        if forward_state == 'unassigned' or reverse_state == 'unassigned':
+            if unassigned:
+                print('\t'.join(previous_line1),file=unresolved) 
+                print('\t'.join(line1),file=unresolved)
+        elif forward_state == 'unresloved' or reverse_state == 'unresolved' \
+            or (forward_state in ['primary_specific','primary_multi'] and \
+                reverse_state in ['secondary_specific','secondary_multi']) \
+            or (forward_state in ['secondary_specific','secondary_multi'] and \
+                reverse_state in ['primary_specific','primary_multi']):
+            if unresolved:
+                print('\t'.join(previous_line1),file=unresolved) 
+                print('\t'.join(line1),file=unresolved)
+                print('\t'.join(previous_line2),file=unresolved) 
+                print('\t'.join(line2),file=unresolved)
+        elif forward_state == 'primary_specific' or reverse_state == 'primary_specific':
+            if primary_specific:
+                print('\t'.join(previous_line1),file=primary_specific) 
+                print('\t'.join(line1),file=primary_specific)
+        elif forward_state == 'secondary_specific' or reverse_state == 'secondary_specific':
+            if secondary_specific:
+                print('\t'.join(previous_line2),file=secondary_specific) 
+                print('\t'.join(line2),file=secondary_specific)
+        elif forward_state == 'primary_multi' or reverse_state == 'primary_multi':
+            if primary_multi:
+                print('\t'.join(previous_line1),file=primary_multi) 
+                print('\t'.join(line1),file=primary_multi)
+        elif forward_state == 'secondary_multi' or reverse_state == 'secondary_multi':
+            if secondary_multi:
+                print('\t'.join(previous_line2),file=secondary_multi) 
+                print('\t'.join(line2),file=secondary_multi)
+        else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state)) # pragma: no cover
         
         previous_line1 = line1
         previous_line2 = line2
@@ -475,6 +605,12 @@ def command_line_interface(*args,**kw):
     parser.add_argument('--paired',
                         action='store_true',
                         help='the SAM files consist of paired reads with forward and reverse reads occuring once and interlaced')
+    parser.add_argument('--conservative',
+                        action='store_true',
+                        help='conservatively allocate paired end reads with discordant category allocations. \
+                              Only pairs that are both specific, or specific and multi will be allocated as specific. \
+                              Pairs that are discordant for species will be deemed unresolved.  Pairs where any read \
+                              is unassigned will be deemed unassigned.')
     parser.add_argument('--min_score',
                         type=float,
                         default=float('-inf'),
@@ -533,7 +669,11 @@ def main():
         
     
     if args.paired:
-        category_counts = main_paired_end(readpairs,
+        if args.conservative:
+            paired_function = conservative_main_paired_end
+        else:
+            paired_function = main_paired_end
+        category_counts = paired_function(readpairs,
                         primary_specific=args.primary_specific,
                         secondary_specific=args.secondary_specific,
                         primary_multi=args.primary_multi,
