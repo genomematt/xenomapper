@@ -252,7 +252,7 @@ def mate_distribution_from_sam(samfile=sys.stdin, sample_size=10000):
             mate_density.append(0)
     return normalised_list(remove_small_values(smoothed_list(mate_density)))
 
-def command_line_interface():
+def command_line_interface(): #pragma: no cover
     parser = argparse.ArgumentParser(description='A script for generating mappability estimates for paired end data.\
                                                 Paired end mappability is inferred from single end mappability.\
                                                 Step one is to generate a fasta file of reads from a fasta file using --fasta \
@@ -284,7 +284,7 @@ def command_line_interface():
     #### TODO test for no arguments and print help
     return args
 
-def main(args = command_line_interface()):
+def main(args = command_line_interface()): #pragma: no cover
     if args.fasta:
         simulate_reads(fastafile=args.fasta, readlength=args.readlength)
     elif args.mapped_test_data:
