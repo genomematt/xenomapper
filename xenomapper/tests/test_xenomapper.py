@@ -105,13 +105,14 @@ class test_main(unittest.TestCase):
         sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
         sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
-        cat_counts = main_paired_end(getReadPairs(sam1,sam2),                                                 primary_specific=test_primary_specific_outfile,
-                                                 secondary_specific=test_secondary_specific_outfile,
-                                                 primary_multi=test_primary_multi_outfile,
-                                                 secondary_multi=test_secondary_multi_outfile,
-                                                 unresolved=test_unresolved_outfile,
-                                                 unassigned=test_unassigned_outfile,
-                                                 )
+        cat_counts = main_paired_end(getReadPairs(sam1,sam2),
+                                     primary_specific=test_primary_specific_outfile,
+                                     secondary_specific=test_secondary_specific_outfile,
+                                     primary_multi=test_primary_multi_outfile,
+                                     secondary_multi=test_secondary_multi_outfile,
+                                     unresolved=test_unresolved_outfile,
+                                     unassigned=test_unassigned_outfile,
+                                     )
         self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'primary_specific' in x])*2,
                          len(test_primary_specific_outfile.getvalue().split('\n'))-30) #29 lines of header in this file
         self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'secondary_specific' in x and not 'primary_specific' in x])*2,
