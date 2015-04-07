@@ -125,7 +125,7 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
 def add_pg_tag(sam_header_list,comment=None):
     new_header = copy(sam_header_list)
     if not [x[0] for x in new_header] == ['@',]*len(new_header):
-        raise ValueError('Incorrect SAM header format :\n{0}'.format('\n'.join(new_header)))
+        raise ValueError('Incorrect SAM header format :\n{0}'.format('\n'.join(new_header))) #pragma: no cover
     if new_header[-1][:3] == '@PG':
         PP = 'PP'+[x for x in new_header[-1].split() if x[:2] == 'ID'][0][2:]+'\t'
     else:
@@ -192,7 +192,7 @@ def get_tag(sam_line,tag='AS'):
     if not tag_list:
         return float('-inf') #this will always be worse than any bowtie score
     if len(tag_list) > 1:
-        raise ValueError('SAM line has multiple values of {0}: {1}'.format(tag,sam_line))
+        raise ValueError('SAM line has multiple values of {0}: {1}'.format(tag,sam_line)) #pragma: no cover
     return float(tag_list[0].split(':')[-1])
 
 #def alternative_get_tag(sam_line,tag='AS'):
