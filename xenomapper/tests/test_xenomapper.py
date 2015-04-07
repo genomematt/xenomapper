@@ -189,6 +189,8 @@ class test_main(unittest.TestCase):
         
         for inpt, outpt in inpt_and_outpt:
             self.assertEqual(get_cigarbased_AS_tag(inpt),outpt)
+        
+        self.assertEqual(get_cigarbased_AS_tag(['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:100', 'XS:i:99'],tag='XS'),99)
         pass
 
     
