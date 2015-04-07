@@ -280,8 +280,17 @@ def command_line_interface(): #pragma: no cover
     parser.add_argument('--sam_for_sizes',
                         type=argparse.FileType('rt'),
                         help='a sam file for calculating insert sizes')
+    parser.add_argument('--version',
+                        action='store_true',
+                        help='print version information and exit')
     args = parser.parse_args()
-    #### TODO test for no arguments and print help
+    if args.version:
+        print(__version__)
+        sys.exit()
+    if not args.fasta and not args.mapped_test_data and not args.single_end_wiggle:
+        print('ERROR: Insufficient arguments provided')
+        parser.print_help()
+        sys.exit(1)
     return args
 
 def main(args = command_line_interface()): #pragma: no cover
