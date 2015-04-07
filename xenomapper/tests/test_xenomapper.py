@@ -59,12 +59,37 @@ class test_main(unittest.TestCase):
         test_primary_multi_outfile = io.StringIO()
         test_secondary_multi_outfile = io.StringIO()
         test_unassigned_outfile = io.StringIO()
-        #sam1 = open('test_human_in.sam','r')
-        #sam2 = open('test_mouse_in.sam','r')
+        test_unresolved_outfile = io.StringIO()
         sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/test_human_in.sam'))
         sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/test_mouse_in.sam'))
-        process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
-        main_single_end(getReadPairs(sam1,sam2), primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
+        process_headers(sam1,sam2,
+                         primary_specific=test_primary_specific_outfile,
+                         secondary_specific=test_secondary_specific_outfile,
+                         primary_multi=test_primary_multi_outfile,
+                         secondary_multi=test_secondary_multi_outfile,
+                         unresolved=test_unresolved_outfile,
+                         unassigned=test_unassigned_outfile,
+                         )
+        cat_counts = main_single_end(getReadPairs(sam1,sam2),
+                         primary_specific=test_primary_specific_outfile,
+                         secondary_specific=test_secondary_specific_outfile,
+                         primary_multi=test_primary_multi_outfile,
+                         secondary_multi=test_secondary_multi_outfile,
+                         unresolved=test_unresolved_outfile,
+                         unassigned=test_unassigned_outfile,
+                         )
+        self.assertEqual(cat_counts['primary_specific'],
+                         len(test_primary_specific_outfile.getvalue().split('\n'))-4) #29 lines of header in this file
+        self.assertEqual(cat_counts['primary_multi'],
+                         len(test_primary_multi_outfile.getvalue().split('\n'))-4) #29 lines of header in this file
+        self.assertEqual(cat_counts['secondary_specific'],
+                         len(test_secondary_specific_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
+        self.assertEqual(cat_counts['secondary_multi'],
+                         len(test_secondary_multi_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
+        self.assertEqual(cat_counts['unassigned'],
+                         len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
+        self.assertEqual(cat_counts['unassigned'],
+                         len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
         self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'b2d04707d7b896057ad64325bcd4f622277b472cf9e0235f0697d394')
         sam1.close()
         sam2.close()
