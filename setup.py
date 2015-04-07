@@ -21,10 +21,12 @@ setup(
     description='xenomapper - mapping mixed reads from two species',
     long_description=open('README.md').read(),
     classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
           'Operating System :: POSIX',
+          'Programming Language :: Python :: 3 :: Only',
           'Programming Language :: Python :: 3.4',
+          'Intended Audience :: Science/Research',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
     ],
 
