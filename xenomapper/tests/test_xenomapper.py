@@ -62,10 +62,10 @@ class test_main(unittest.TestCase):
         #sam1 = open('test_human_in.sam','r')
         #sam2 = open('test_mouse_in.sam','r')
         sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/test_human_in.sam'))
-        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/test_human_in.sam'))
+        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/test_mouse_in.sam'))
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
         main_single_end(getReadPairs(sam1,sam2), primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'4951dcd9bde5c24ee1c94ce49da6e910efcf1721c04af71a0e1127df')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'b2d04707d7b896057ad64325bcd4f622277b472cf9e0235f0697d394')
         sam1.close()
         sam2.close()
         pass
