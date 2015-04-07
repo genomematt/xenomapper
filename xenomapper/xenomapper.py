@@ -53,11 +53,6 @@ def get_bam_header(bamfile): #pragma: no cover #not tested due to need for samto
     bamfile.seek(0) #reset to start of file for next samtools call
     return [x.strip('\n') for x in header]
 
-#### To do: Check aligner and command line options in SAM file & warn if not bowtie2 or if there is an argument mismatch
-
-
-#['HWI-ST960:63:D0CYJACXX:4:1101:6951:2219', '0', '9', '20953017', '44', '49M1S', '*', '0', '0', 'GNTTTATTGGAGCAGCTATTGGCTTCTTCATTGCAGGAGGAAAAAAAGGT', '@#1ADDDFFHFFHIJIJJIJIJJJJ?EH@@FFFGIII@GHCHIIJJI@F8', 'AS:i:87', 'XN:i:0', 'XM:i:2', 'XO:i:0', 'XG:i:0', 'NM:i:2', 'MD:Z:1T30A16', 'YT:Z:UU\n']
-
 def bam_lines(f): #pragma: no cover #not tested due to need for samtools
     """Use samtools in a subprocess to yield lines of sam from a bam file
         Arguments: a file or file like object in bam format
@@ -81,7 +76,6 @@ def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False): #pragma: no c
     line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
     line2= next(bam2).strip('\n').split()
     while line1 and line2 and line1 !=[''] and line2 !=['']:
-        #print(line1[0],line2[0],file=sys.stderr)
         assert line1[0] == line2[0]
         yield line1,line2
         previous_read1 = line1[0]
@@ -107,7 +101,6 @@ def getReadPairs(sam1,sam2, skip_repeated_reads=False):
     line1= sam1.readline().strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
     line2= sam2.readline().strip('\n').split()
     while line1 and line2 and line1 !=[''] and line2 !=['']:
-        #print(line1[0],line2[0],file=sys.stderr)
         assert line1[0] == line2[0]
         yield line1,line2
         previous_read1 = line1[0]
@@ -305,7 +298,6 @@ def main_single_end(readpairs,
                     occurance counts
     """
     #assume that reads occur only once and are in the same order in both files
-    #TO DO: add a test for these conditions
     
     category_counts = Counter()
     
@@ -481,17 +473,6 @@ def conservative_main_paired_end(readpairs,
                     occurance counts
     """
     
-    #Potential states:
-    #   pair maps uniquely to primary = primary_specific
-    #   pair maps uniquely to secondary = secondary_specific
-    #   #Note: do not currently require mapping as a pair - just need both ends to single end map
-    #   one read multimaps to primary and second read maps uniquely to primary = primary_specific
-    #   one read multimaps to secondary and second read maps uniquely to secondary = secondary_specific
-    #   both reads multimap to primary = primary_multi
-    #   both reads multimap to secondary = secondary_multi
-    #   one read does not map at all = unassigned (this is a conservative allocation - also puts virus/transgene boundary reads in this file)
-    #   one read maps to primary, other read to secondary = unresolved
-    
     category_counts = Counter()
     
     previous_line1 = []
@@ -556,7 +537,7 @@ def conservative_main_paired_end(readpairs,
         
     return category_counts
 
-def command_line_interface(*args,**kw):
+def command_line_interface(*args,**kw): #pragma: no cover
     parser = argparse.ArgumentParser(prog = "xenomapper",
                     formatter_class=argparse.RawDescriptionHelpFormatter,
                     description=textwrap.dedent("""\
@@ -665,9 +646,8 @@ def command_line_interface(*args,**kw):
     return args
     
 
-def main():
+def main(): #pragma: no cover
     args = command_line_interface()
-    #print(args, file=sys.stderr)
     tag_func = get_cigarbased_AS_tag if args.cigar_scores else get_tag
     
     
@@ -728,6 +708,6 @@ def main():
     pass
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__main__': #pragma: no cover
+    main() 
     
