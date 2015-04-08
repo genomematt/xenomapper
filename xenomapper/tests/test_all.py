@@ -11,5 +11,14 @@ import unittest
 from xenomapper.tests.test_xenomapper import *
 from xenomapper.tests.test_mappability import *
 
+__author__ = "Matthew Wakefield"
+__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
+__credits__ = ["Matthew Wakefield",]
+__license__ = "GPL"
+__version__ = "1.0b1"
+__maintainer__ = "Matthew Wakefield"
+__email__ = "wakefield@wehi.edu.au"
+__status__ = "Beta"
+
 if __name__ == "__main__":
     unittest.main()

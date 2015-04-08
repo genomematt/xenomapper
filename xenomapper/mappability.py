@@ -17,10 +17,10 @@ from collections import Counter
 from xenomapper.xenomapper import get_sam_header
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011,  Matthew Wakefield and The Walter and Eliza Hall Institute"
+__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "0.4.0"
+__version__ = "1.0b1"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -40,12 +40,11 @@ class Mappability(dict):
         #fixedStep chrom=chrN start=pos step=1
         #value
         #value
-        for chrom in self:
-            if chromosomes and not chrom in chromosomes:
-                continue
-            print('fixedStep\tchrom={0}\tstart=1\tstep=1'.format(chrom), file=wigglefile)
-            for score in self[chrom]:
-                print(str(score))
+        for chrom in sorted(self):
+            if not chromosomes or chrom in chromosomes:
+                print('fixedStep\tchrom={0}\tstart=1\tstep=1'.format(chrom), file=wigglefile)
+                for score in self[chrom]:
+                    print(str(score), file=wigglefile)
         pass
     
     def from_wiggle(self,wigglefile=sys.stdin,datatype=float):
@@ -64,7 +63,7 @@ class Mappability(dict):
                 #check it is not already there
                 #check start=1 and step=1
                 line = line.strip().split('\t')
-                if line[1].split('=')[0] != 'chrom' or line[2] != 'start=1' or line[3] != 'step=1':
+                if line[1].split('=')[0] != 'chrom' or line[2] != 'start=1' or line[3] != 'step=1': #pragma: no cover
                     raise ValueError('Unsupported wiggle fixed step format [must be in the format "fixedStep chrom=chrX start=1 step=1"] {0}'.format(line))
                 if chrom and values:
                     #if we have accumulated values for a previous chromosome add them to self
@@ -74,7 +73,7 @@ class Mappability(dict):
             else:
                 try:
                     values.append(datatype(line))
-                except:
+                except: #pragma: no cover
                     #placeholder for type conversion error handling
                     raise
         #at end of file add remaining data to self
@@ -93,7 +92,7 @@ class Mappability(dict):
         """
         def _mappability_by_mate_density(mapability,mate_density):
             #defined as local scope function as may be replaced for speed.
-            result = 0
+            result = 0.0
             j = 0
             while j < len(mapability) and j < len(mate_density):
                 result += mapability[j] * mate_density[j]
@@ -165,53 +164,54 @@ def simulate_reads(fastafile, readlength=100, outfile=sys.stdout):
     pass
 
 def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_gaps=True, chromosome_sizes = {}):
-    mapable = Mappability(chromosome_sizes=chromosome_sizes)
+    mappable = Mappability(chromosome_sizes=chromosome_sizes)
     
     #parse sam data and add to object
     header = get_sam_header(samfile)
-    mapable_chrom = None
-    mapable_pos = 0
-    mapable_values = []
+    mappable_chrom = None
+    mappable_pos = 0
+    mappable_values = []
     for line in samfile:
         name, x, chrom, pos, flag, cigar, mate_chr, mate_pos, insert_size, seq, qual, *tags = line.strip('\n').split()
-        if mapable_chrom != name.split('_')[0]:
-            if mapable_chrom and mapable_values:
-                mapable[mapable_chrom] = mapable_values
-            mapable_chrom = chrom
-            mapable_pos = 0
-            mapable_values = []
-        mapable_pos += 1
+        if mappable_chrom != name.split('_')[0]:
+            if mappable_chrom and mappable_values:
+                mappable[mappable_chrom] = mappable_values
+            mappable_chrom = chrom
+            mappable_pos = 0
+            mappable_values = []
+        mappable_pos += 1
         name_pos = int(name.split('_')[1])
-        if name_pos != mapable_pos:
-            if not name_pos > mapable_pos:
-                raise ValueError('Name is not sequential.  SAM must be in name sorted order Name: {0} Expected: {1}_{2}'.format(name,mapable_chrom,mapable_pos))
+        if name_pos != mappable_pos: #pragma: no cover
+            if not name_pos > mappable_pos:
+                raise ValueError('Name is not sequential.  SAM must be in name sorted order Name: {0} Expected: {1}_{2}'.format(name,mappable_chrom,mappable_pos))
             else:
                 #there are missing reads in the sequence.
-                number_missing = name_pos - mapable_pos
-                mapable_pos = name_pos
-                mapable_values.extend([0,]*number_missing)
+                number_missing = name_pos - mappable_pos
+                mappable_pos = name_pos
+                mappable_values.extend([0,]*number_missing)
                 
         if name.split('_') == [chrom, pos] and flag == '42':
-            mapable_values.append(1)
+            mappable_values.append(1)
         else:
-            mapable_values.append(0)
+            mappable_values.append(0)
     #add remainging chromosome and values at the end of the file
-    if mapable_chrom and mapable_values:
-        mapable[mapable_chrom] = mapable_values
+    if mappable_chrom and mappable_values:
+        mappable[mappable_chrom] = mappable_values
     
     #write wiggle file
-    mapable.to_wiggle(wigglefile=outfile)
+    mappable.to_wiggle(wigglefile=outfile)
     
     pass
 
 def paired_end_mappability(wiggle, mate_density, outfile=sys.stdout, chromosome_sizes={}):
-    mapable = Mappability(chromosome_sizes=chromosome_sizes)
+    mappable = Mappability(chromosome_sizes=chromosome_sizes)
+    chromosomes = list(chromosome_sizes.keys())
     
-    mapable.from_wiggle(wiggle, datatype=int)
+    mappable.from_wiggle(wiggle, datatype=float)
     
-    pair_mapability = mapable.single_end_to_paired(mate_density = mate_density)
+    pair_mappability = mappable.single_end_to_paired(mate_density = mate_density)
     
-    pair_mapability.to_wiggle(wigglefile=outfile)
+    pair_mappability.to_wiggle(wigglefile=outfile, chromosomes=chromosomes)
     
     pass
 
@@ -252,7 +252,7 @@ def mate_distribution_from_sam(samfile=sys.stdin, sample_size=10000):
             mate_density.append(0)
     return normalised_list(remove_small_values(smoothed_list(mate_density)))
 
-def command_line_interface():
+def command_line_interface(): #pragma: no cover
     parser = argparse.ArgumentParser(description='A script for generating mappability estimates for paired end data.\
                                                 Paired end mappability is inferred from single end mappability.\
                                                 Step one is to generate a fasta file of reads from a fasta file using --fasta \
@@ -280,11 +280,22 @@ def command_line_interface():
     parser.add_argument('--sam_for_sizes',
                         type=argparse.FileType('rt'),
                         help='a sam file for calculating insert sizes')
+    parser.add_argument('--version',
+                        action='store_true',
+                        help='print version information and exit')
     args = parser.parse_args()
-    #### TODO test for no arguments and print help
+    if args.version:
+        print(__version__)
+        sys.exit()
+    if (not args.fasta) and (not args.mapped_test_data) and (not args.single_end_wiggle):
+        print('ERROR: Insufficient arguments provided')
+        parser.print_help()
+        sys.exit(1)
     return args
 
-def main(args = command_line_interface()):
+def main(args=None): #pragma: no cover
+    if not args:
+        args = command_line_interface()
     if args.fasta:
         simulate_reads(fastafile=args.fasta, readlength=args.readlength)
     elif args.mapped_test_data:
@@ -297,6 +308,6 @@ def main(args = command_line_interface()):
     pass
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     main()
     
