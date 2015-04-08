@@ -145,14 +145,15 @@ class test_main(unittest.TestCase):
                                                  unresolved=test_unresolved_outfile,
                                                  unassigned=test_unassigned_outfile,
                                                  )
-        self.assertEqual(cat_counts[('primary_specific', 'secondary_specific')]*4, len(test_unresolved_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(cat_counts[('primary_specific', 'secondary_specific')]*4 +\
+                         cat_counts[('unresolved', 'unresolved')]*4, len(test_unresolved_outfile.getvalue().split('\n'))-1) #this test is not exhastive. Only states in test data
         self.assertEqual(cat_counts[('primary_multi', 'primary_multi')]*2, len(test_primary_multi_outfile.getvalue().split('\n'))-1)
         self.assertEqual(cat_counts[('secondary_multi', 'secondary_multi')]*2, len(test_secondary_multi_outfile.getvalue().split('\n'))-1)
         self.assertEqual(cat_counts[('primary_specific', 'primary_specific')]*2 + cat_counts[('primary_specific', 'primary_multi')]*2 + cat_counts[('primary_multi', 'primary_specific')]*2,
                          len(test_primary_specific_outfile.getvalue().split('\n'))-30) #29 lines of header in this file
         self.assertEqual(cat_counts[('secondary_specific', 'secondary_specific')]*2 + cat_counts[('secondary_specific', 'secondary_multi')]*2 + cat_counts[('secondary_multi', 'secondary_specific')]*2,
                          len(test_secondary_specific_outfile.getvalue().split('\n'))-27)  #26 lines of header in this file
-        self.assertEqual(cat_counts[('unassigned', 'unassigned')]*4, len(test_unassigned_outfile.getvalue().split('\n'))-1)
+        self.assertEqual(cat_counts[('unassigned', 'unassigned')]*2, len(test_unassigned_outfile.getvalue().split('\n'))-1)
         
         self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'d8b01c0d83732ec3f53fe0418741887f264d061275962000a08c2b7b')
         sam1.close()

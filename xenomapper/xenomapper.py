@@ -402,6 +402,7 @@ def main_paired_end(readpairs,
         
         category_counts[(forward_state,reverse_state)] += 1
         
+        
         if forward_state == 'primary_specific' or reverse_state == 'primary_specific':
             if primary_specific:
                 print('\t'.join(previous_line1),file=primary_specific) 
@@ -426,7 +427,7 @@ def main_paired_end(readpairs,
                 print('\t'.join(line2),file=unresolved)
         elif forward_state == 'unassigned' or reverse_state == 'unassigned':
             if unassigned:
-                print('\t'.join(previous_line1),file=unresolved) 
+                print('\t'.join(previous_line1),file=unassigned) 
                 print('\t'.join(line1),file=unresolved)
         else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state)) # pragma: no cover
         
@@ -502,8 +503,8 @@ def conservative_main_paired_end(readpairs,
         category_counts[(forward_state,reverse_state)] += 1
         if forward_state == 'unassigned' or reverse_state == 'unassigned':
             if unassigned:
-                print('\t'.join(previous_line1),file=unresolved) 
-                print('\t'.join(line1),file=unresolved)
+                print('\t'.join(previous_line1),file=unassigned) 
+                print('\t'.join(line1),file=unassigned)
         elif forward_state == 'unresloved' or reverse_state == 'unresolved' \
             or (forward_state in ['primary_specific','primary_multi'] and \
                 reverse_state in ['secondary_specific','secondary_multi']) \
