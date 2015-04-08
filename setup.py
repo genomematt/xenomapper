@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='XenoMapper',
-    version='0.5.1b3',
+    version='1.0b1',
     author='Matthew Wakefield',
     author_email='matthew.wakefield@unimelb.edu.au',
     packages=['xenomapper'],
