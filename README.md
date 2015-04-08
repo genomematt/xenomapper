@@ -131,7 +131,7 @@ This feature is computationally intensive for useful genomes.  In most cases you
 	
 Citing Xenomapper
 =================
-Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.
+Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.  The DOI for the most current version is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](http://dx.doi.org/10.5281/zenodo.16677)
 
 References
 =================
