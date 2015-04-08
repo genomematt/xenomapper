@@ -43,12 +43,12 @@ class test_main(unittest.TestCase):
                      unresolved=test_unresolved_outfile,
                      unassigned=test_unassigned_outfile,
                      )
-        self.assertEqual(len(test_primary_specific_outfile.getvalue()),697)
-        self.assertEqual(len(test_secondary_specific_outfile.getvalue()),631)
-        self.assertEqual(len(test_primary_multi_outfile.getvalue()),710)
-        self.assertEqual(len(test_secondary_multi_outfile.getvalue()),644)
-        self.assertEqual(len(test_unassigned_outfile.getvalue()),707)
-        self.assertEqual(len(test_unresolved_outfile.getvalue()),707)
+        self.assertEqual(len(test_primary_specific_outfile.getvalue()),695)
+        self.assertEqual(len(test_secondary_specific_outfile.getvalue()),629)
+        self.assertEqual(len(test_primary_multi_outfile.getvalue()),708)
+        self.assertEqual(len(test_secondary_multi_outfile.getvalue()),642)
+        self.assertEqual(len(test_unassigned_outfile.getvalue()),705)
+        self.assertEqual(len(test_unresolved_outfile.getvalue()),705)
         sam1.close()
         sam2.close()
         pass
@@ -90,7 +90,7 @@ class test_main(unittest.TestCase):
                          len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
         self.assertEqual(cat_counts['unassigned'],
                          len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'b2d04707d7b896057ad64325bcd4f622277b472cf9e0235f0697d394')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'3092a92536c8bdcf08d3163f9d5db936f4f097c8c6ccbf167f8f681c')
         sam1.close()
         sam2.close()
         pass
@@ -122,7 +122,7 @@ class test_main(unittest.TestCase):
         self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'secondary_multi' in x \
                         and not 'primary_multi' in x and not 'primary_specific' in x and not 'secondary_specific' in x])*2,
                         len(test_secondary_multi_outfile.getvalue().split('\n'))-1)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'008c48f9952df7e9b8ab89d5d90fb2f75aa3ff0c882bbf506e0df07f')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'46f12d0b3509204eab28a13c9e36c6472713924b33180d02bc4a211a')
         sam1.close()
         sam2.close()
         pass
@@ -155,7 +155,7 @@ class test_main(unittest.TestCase):
                          len(test_secondary_specific_outfile.getvalue().split('\n'))-27)  #26 lines of header in this file
         self.assertEqual(cat_counts[('unassigned', 'unassigned')]*2, len(test_unassigned_outfile.getvalue().split('\n'))-1)
         
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'d8b01c0d83732ec3f53fe0418741887f264d061275962000a08c2b7b')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'c4c547c1ab172794904a024d433205ad98266517cee11628e6734b27')
         sam1.close()
         sam2.close()
         pass
