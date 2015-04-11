@@ -2,6 +2,12 @@ language: python
 python:
   - "3.4"
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip3 install .
+install:
+  - pip3 install .
+before_script:
+  - pip3 install coverage
 # command to run tests, e.g. python setup.py test
-script:  python3 -m xenomapper.tests.test_all
+script:
+  - coverage run -m xenomapper.tests.test_all
+after_success:
+  - coveralls
