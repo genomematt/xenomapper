@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/genomematt/xenomapper.svg?branch=master)](https://travis-ci.org/genomematt/xenomapper)
+[![Coverage Status](https://coveralls.io/repos/genomematt/xenomapper/badge.svg)](https://coveralls.io/r/genomematt/xenomapper)
 
 Xenomapper
 ==========
