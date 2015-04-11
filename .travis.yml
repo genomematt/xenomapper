@@ -9,6 +9,6 @@ before_script:
   - pip3 install coverage
 # command to run tests, e.g. python setup.py test
 script:
-  - coverage run -m xenomapper.tests.test_all
+  - coverage run --source xenomapper.xenomapper,xenomapper.mappability -m xenomapper.tests.test_all
 after_success:
   - coveralls
