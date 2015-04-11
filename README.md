@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/genomematt/xenomapper.svg?branch=master)](https://travis-ci.org/genomematt/xenomapper)
 [![Coverage Status](https://coveralls.io/repos/genomematt/xenomapper/badge.svg)](https://coveralls.io/r/genomematt/xenomapper)
+[![Wheel Status](https://pypip.in/wheel/XenoMapper/badge.svg)](https://pypi.python.org/pypi/XenoMapper/)
 
 Xenomapper
 ==========
@@ -14,9 +15,14 @@ Installation
 ============
 Xenomapper requires python 3.4 or higher and is tested on linux and MacOS.  For bam file decoding samtools must be installed.
 
+Installing from pypi with pip is the easiest option:
+
+    pip3 install xenomapper
+    
+Alternatively if you would like to install from the github repository
 
     git clone https://github.com/genomematt/xenomapper
-    pip3 install xenomapper
+    pip3 install --upgrade xenomapper
     python3 -m xenomapper.tests.test_all
 
 All users should upgrade to v0.5.0 or higher
