@@ -8,7 +8,7 @@ install_requires = []
 try:
     import statistics
 except ImportError:
-    install_requires.append('statistics')
+    install_requires.append('backports.statistics')
 
 setup(
     name='XenoMapper',
