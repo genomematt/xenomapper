@@ -3,6 +3,13 @@
 
 from setuptools import setup
 
+install_requires = []
+
+try:
+    import statistics
+except ImportError:
+    install_requires.append('statistics')
+
 setup(
     name='XenoMapper',
     version='1.0b1',
@@ -10,6 +17,7 @@ setup(
     author_email='matthew.wakefield@unimelb.edu.au',
     packages=['xenomapper'],
     include_package_data = True,
+    install_requires=install_requires,
     url='https://github.com/genomematt/xenomapper.git',
     license='GPL',
     entry_points={
