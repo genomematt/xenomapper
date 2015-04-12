@@ -5,7 +5,7 @@
 Xenomapper
 ==========
 
-Xenomapper is a utility for post processing Bowtie2 (Langmead, 2012) mapped reads that have been aligned to a primary genome and a secondary genome and binning reads into species specific, multimapping in each species, unmapped and unassigned bins.  It can be used on single end or paired end sequencing data.  In paired end data it is assumed both reads come from the same species and evidence of sequence specificity for either read will be used to assign both reads.
+Xenomapper is a utility for post processing Bowtie2 (Langmead, 2012) mapped reads that have been aligned to a primary genome and a secondary genome and binning reads into species specific, multimapping in each species, unmapped and unassigned bins.  It can be used on single end or paired end sequencing data.  In paired end data evidence of sequence specificity for either read will be used to assign both reads.
 
 Use cases include xenografts of human cancers in mouse and host pathogen interactions.
 
@@ -15,7 +15,7 @@ Installation
 ============
 Xenomapper requires python 3.2 or higher and is tested on linux and MacOS with CPython and pypy3.  For bam file decoding samtools must be installed.
 
-Installing from pypi with pip is the easiest option:
+Installing from the Python Package Index with pip is the easiest option:
 
     pip3 install xenomapper
     
@@ -99,6 +99,12 @@ usage:
 	                        equally well in both species) reads
 	  --paired              the SAM files consist of paired reads with forward and
 	                        reverse reads occuring once and interlaced
+	  --conservative        conservatively allocate paired end reads with
+	                        discordant category allocations. Only pairs that are
+	                        both specific, or specific and multi will be allocated
+	                        as specific. Pairs that are discordant for species
+	                        will be deemed unresolved. Pairs where any read is
+	                        unassigned will be deemed unassigned.
 	  --min_score MIN_SCORE
 							the minimum mapping score.  Reads with scores less than
 							or equal to min_score will be considered unassigned.
@@ -138,7 +144,7 @@ This feature is computationally intensive for useful genomes.  In most cases you
 	
 Citing Xenomapper
 =================
-Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.  The DOI for the most current version is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](http://dx.doi.org/10.5281/zenodo.16677)
+Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.  The DOI for the current release is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](http://dx.doi.org/10.5281/zenodo.16677)
 
 References
 =================
