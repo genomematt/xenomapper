@@ -13,7 +13,7 @@ Use cases include xenografts of human cancers in mouse and host pathogen interac
 
 Installation
 ============
-Xenomapper requires python 3.4 or higher and is tested on linux and MacOS.  For bam file decoding samtools must be installed.
+Xenomapper requires python 3.2 or higher and is tested on linux and MacOS with CPython and pypy3.  For bam file decoding samtools must be installed.
 
 Installing from pypi with pip is the easiest option:
 
