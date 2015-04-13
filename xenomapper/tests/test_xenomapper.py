@@ -219,6 +219,18 @@ class test_main(unittest.TestCase):
         
         self.assertEqual(get_cigarbased_AS_tag(['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:100', 'XS:i:99'],tag='XS'),99)
         pass
+        
+    def test_output_summary(self):
+        test_outfile = io.StringIO()
+        canned_output='--------------------------------------------------------------------------------\n' + \
+                    'Read Count Category Summary\n\n' + \
+                    '|       Category                                     |     Count       |\n' + \
+                    '|:--------------------------------------------------:|:---------------:|\n' + \
+                    '|  bar                                               |            101  |\n' + \
+                    '|  foo                                               |              1  |\n\n'
+        output_summary({'foo':1,'bar':101},outfile=test_outfile)
+        self.assertEqual(test_outfile.getvalue(),canned_output)
+        pass
 
     
 if __name__ == '__main__':
