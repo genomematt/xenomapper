@@ -28,7 +28,7 @@ __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "1.0b2"
+__version__ = "1.0b3"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Beta"
@@ -538,6 +538,16 @@ def conservative_main_paired_end(readpairs,
         
     return category_counts
 
+def output_summary(category_counts, outfile=sys.stderr):
+    print('-'*80, file=outfile)
+    print('Read Count Category Summary\n', file=outfile)
+    print('|       {0:45s}|     {1:10s}  |'.format('Category','Count'), file=outfile)
+    print('|:','-'*50,':|:','-'*15,':|',sep='', file=outfile)
+    for category in sorted(category_counts):
+        print('|  {0:50s}|{1:15d}  |'.format(str(category),category_counts[category]), file=outfile)
+    print(file=outfile)
+    pass
+
 def command_line_interface(*args,**kw): #pragma: no cover
     parser = argparse.ArgumentParser(prog = "xenomapper",
                     formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -701,11 +711,7 @@ def main(): #pragma: no cover
                         min_score=args.min_score,
                         tag_func=tag_func)
     
-    print('-'*80, file=sys.stderr)
-    print('Read Count Category Summary', file=sys.stderr)
-    for category, cat_count in category_counts:
-        print('  {:25s}:{12d}'.format(category,cat_count), file=sys.stderr)
-    
+    output_summary(category_counts=category_counts)
     pass
 
 

@@ -17,7 +17,7 @@ __author__ = "Matthew Wakefield"
 __copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "1.0b2"
+__version__ = "1.0b3"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Beta"
@@ -90,7 +90,7 @@ class test_main(unittest.TestCase):
                          len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
         self.assertEqual(cat_counts['unassigned'],
                          len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'e2100c753d9f3d69bbf0007a792f1c296da07359b7a9c9c832b4f584')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'394dde1269090368ec8f4b54715070c11252c10ac3b08dd2077ac782')
         sam1.close()
         sam2.close()
         pass
@@ -122,7 +122,7 @@ class test_main(unittest.TestCase):
         self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'secondary_multi' in x \
                         and not 'primary_multi' in x and not 'primary_specific' in x and not 'secondary_specific' in x])*2,
                         len(test_secondary_multi_outfile.getvalue().split('\n'))-1)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'cf61f8069a391ef1efcb7586cdde123e9854a63b274a60091553de53')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'fd785f22415a19485592745ef8562ca20b0e6b431e4716a51931ab65')
         sam1.close()
         sam2.close()
         pass
@@ -155,7 +155,7 @@ class test_main(unittest.TestCase):
                          len(test_secondary_specific_outfile.getvalue().split('\n'))-27)  #26 lines of header in this file
         self.assertEqual(cat_counts[('unassigned', 'unassigned')]*2, len(test_unassigned_outfile.getvalue().split('\n'))-1)
         
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'c587a5df6aad0259f7b677bf0e73a6a58f618ed7d329b6a18c429d0c')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'29ecf2a632d2d55cda734d6d720c5d863c3804b262915207055eca4c')
         sam1.close()
         sam2.close()
         pass
@@ -218,6 +218,18 @@ class test_main(unittest.TestCase):
             self.assertEqual(get_cigarbased_AS_tag(inpt),outpt)
         
         self.assertEqual(get_cigarbased_AS_tag(['', '', '', '', '', '50M', '', '', '', '', '', 'NM:i:0', 'AS:i:100', 'XS:i:99'],tag='XS'),99)
+        pass
+        
+    def test_output_summary(self):
+        test_outfile = io.StringIO()
+        canned_output='--------------------------------------------------------------------------------\n' + \
+                    'Read Count Category Summary\n\n' + \
+                    '|       Category                                     |     Count       |\n' + \
+                    '|:--------------------------------------------------:|:---------------:|\n' + \
+                    '|  bar                                               |            101  |\n' + \
+                    '|  foo                                               |              1  |\n\n'
+        output_summary({'foo':1,'bar':101},outfile=test_outfile)
+        self.assertEqual(test_outfile.getvalue(),canned_output)
         pass
 
     
