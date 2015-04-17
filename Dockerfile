@@ -1,13 +1,14 @@
 # How to run Xenomapper in a docker container
 
 # Docker File Author / Maintainer
-MAINTAINER Matthew Wakefield <matthew.wakefield@unimelb.edu.au>
+# MAINTAINER Matthew Wakefield <matthew.wakefield@unimelb.edu.au>
 
 # First you will need install docker.  On MacOS you do
 # brew install Caskroom/cask/virtualbox
 # brew install docker
 # brew install boot2docker
 # boot2docker download
+# boot2docker init
 # boot2docker up
 # $(boot2docker shellinit)
 
@@ -18,7 +19,9 @@ MAINTAINER Matthew Wakefield <matthew.wakefield@unimelb.edu.au>
 # This will run the following executable part of this file
 
 FROM ubuntu:14.04
+MAINTAINER Matthew Wakefield <matthew.wakefield@unimelb.edu.au>
 RUN apt-get update && apt-get install -y \
+	samtools \
 	python3-pip \
 	git
 RUN pip3 install git+https://github.com/genomematt/xenomapper.git
