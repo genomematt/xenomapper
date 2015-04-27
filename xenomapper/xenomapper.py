@@ -661,6 +661,7 @@ def main(): #pragma: no cover
     args = command_line_interface()
     tag_func = get_cigarbased_AS_tag if args.cigar_scores else get_tag
     
+    skip_repeated = False if args.paired else True
     
     if args.primary_sam:
         process_headers(args.primary_sam,args.secondary_sam,
@@ -671,7 +672,7 @@ def main(): #pragma: no cover
                             unassigned=args.unassigned,
                             unresolved=args.unresolved)
                         
-        readpairs = getReadPairs(args.primary_sam,args.secondary_sam)
+        readpairs = getReadPairs(args.primary_sam, args.secondary_sam, skip_repeated_reads=skip_repeated)
     else:
         process_headers(args.primary_bam,args.secondary_bam,
                             primary_specific=args.primary_specific,
@@ -682,7 +683,7 @@ def main(): #pragma: no cover
                             unresolved=args.unresolved,
                             bam=True)
                         
-        readpairs = getBamReadPairs(args.primary_bam,args.secondary_bam)
+        readpairs = getBamReadPairs(args.primary_bam, args.secondary_bam, skip_repeated_reads=skip_repeated)
         
     
     if args.paired:
