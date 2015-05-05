@@ -125,7 +125,7 @@ def add_pg_tag(sam_header_list,comment=None):
         PP = ''
     new_header.append('@PG\tID:Xenomapper\tPN:Xenomapper\t'+PP+'VN:{0}'.format(__version__))
     if comment:
-        new_header.append('@CO '+comment)
+        new_header.append('@CO\t'+comment)
     return new_header
 
 def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific=None, primary_multi=None, secondary_multi=None, unassigned=None, unresolved=None, bam=False):
