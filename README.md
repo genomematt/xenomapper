@@ -5,9 +5,11 @@
 Xenomapper
 ==========
 
-Xenomapper is a utility for post processing Bowtie2 (Langmead, 2012) mapped reads that have been aligned to a primary genome and a secondary genome and binning reads into species specific, multimapping in each species, unmapped and unassigned bins.  It can be used on single end or paired end sequencing data.  In paired end data evidence of sequence specificity for either read will be used to assign both reads.
+Xenomapper is a utility for post processing mapped reads that have been aligned to a primary genome and a secondary genome and binning reads into species specific, multimapping in each species, unmapped and unassigned bins.  It can be used on single end or paired end sequencing data.  In paired end data evidence of sequence specificity for either read will be used to assign both reads.
 
-Use cases include xenografts of human cancers in mouse and host pathogen interactions.
+Use cases include xenografts of human cancers and host pathogen interactions.
+
+Xenomapper is most effective with mapped reads that include an XS or ZS score that gives the mapping score of the next best read.  These include Bowtie2 (Langmead, 2012) and HISAT (Kim, 2015). 
 
 ![Schematic of Xenomapper Use](/schematic.jpg "Schematic of Xenomapper Use")
 
@@ -149,4 +151,5 @@ Currently Xenomapper is unpublished, but this repository does have a DOI identif
 References
 =================
 Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012, 9:357-359. http://bowtie-bio.sourceforge.net/bowtie2/
+Kim D, Langmead B, Salzberg SL. HISAT: a fast spliced aligner with low memory requirements. Nat Methods. 2015 12:357-60. https://github.com/infphilo/hisat
 
