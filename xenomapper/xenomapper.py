@@ -188,6 +188,21 @@ def get_tag(sam_line,tag='AS'):
         raise ValueError('SAM line has multiple values of {0}: {1}'.format(tag,sam_line)) #pragma: no cover
     return float(tag_list[0].split(':')[-1])
 
+def get_tag_with_ZS_as_XS(sam_line,tag='AS'):
+    """Return the value of a SAM tag field
+    Arguments:
+        sam_line  - list of elements from a SAM file line
+        tag       - the name of the optional tag to be returned
+                    Only suitable for numeric tags eg AS or XS
+                    Requests for XS will return the value for ZS
+    Returns
+        tag_value - the value of the SAM tag converted to a float
+                    or -inf if tag is not present.
+    """
+    if tag == 'XS':
+        tag = 'ZS' 
+    return get_tag(sam_line,tag)
+
 #def alternative_get_tag(sam_line,tag='AS'):
 #    """Dummy code example for overriding get_tag to support
 #    aligners that produce a useful score but store it in an
@@ -642,6 +657,10 @@ def command_line_interface(*args,**kw): #pragma: no cover
                               Score is -6 * mismatches + -5 * indel open + -3 * indel extend + -2 * softclip. \
                               Treatment of multimappers will vary with aligner.  If multimappers are assigned a cigar line they \
                               will be treated as species specific, otherwise as unassigned.')
+    parser.add_argument('--use_zs',
+                        action='store_true',
+                        help='Use the value of the ZS tag in place of XS for determining the mapping score of the next best \
+                              alignment.  Used with HISAT as the XS:A tag is conventionally used for strand in spliced mappers.')
     parser.add_argument('--version',
                         action='store_true',
                         help='print version information and exit')
@@ -659,7 +678,13 @@ def command_line_interface(*args,**kw): #pragma: no cover
 
 def main(): #pragma: no cover
     args = command_line_interface()
-    tag_func = get_cigarbased_AS_tag if args.cigar_scores else get_tag
+    
+    if args.cigar_scores:
+        tag_func = get_cigarbased_AS_tag
+    elif args.use_zs:
+        tag_func = get_tag_with_ZS_as_XS
+    else:
+        tag_func = get_tag
     
     skip_repeated = False if args.paired else True
     
