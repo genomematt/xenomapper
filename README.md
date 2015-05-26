@@ -120,6 +120,10 @@ usage:
 	                        be calculated in the multimapping species. Score is -6
 	                        * mismatches + -5 * indel open + -3 * indel extend +
 	                        -2 * softclip.
+	  --use_zs              Use the value of the ZS tag in place of XS for
+	                        determining the mapping score of the next best
+	                        alignment. Used with HISAT as the XS:A tag is
+	                        conventionally used for strand in spliced mappers.
 	  --version             print version information and exit
 
 
