@@ -37,7 +37,7 @@ class test_mappability(unittest.TestCase):
         outputfasta = io.StringIO()
         inputfastafile = io.TextIOWrapper(resource_stream(__name__, 'data/test_from_EcoliK12DH10B.fasta'))
         simulate_reads(inputfastafile,readlength=150,outfile=outputfasta)
-        self.assertEqual(hashlib.sha224(outputfasta.getvalue().encode('latin-1')).hexdigest(),'91f0a1378bdf919d8e731237183950e3a8106231b11f7bd9832db600')
+        self.assertEqual(hashlib.sha224(outputfasta.getvalue().encode('latin-1')).hexdigest(),'227d299d0b0d2a348a41d6a5397668ca6a9ac5218ab4f85d68fd5c53')
 
         canned_result = '>testing_1\nabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX\n' + \
                         '>testing_2\nbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY\n' + \
@@ -105,8 +105,8 @@ class test_mappability(unittest.TestCase):
     def test_single_end_mappability_from_sam(self):
         EcoliK12DH10B_150sam = io.TextIOWrapper(resource_stream(__name__, 'data/test_from_EcoliK12DH10B_150reads.sam'))
         resultfile = io.StringIO()
-        single_end_mappability_from_sam(EcoliK12DH10B_150sam, outfile=resultfile, chromosome_sizes={'Chromosome':2752,'Repeat':991})
-        self.assertEqual(hashlib.sha224(resultfile.getvalue().encode('latin-1')).hexdigest(),'af1a1a05670a6137aebb248e60173eb10275459318f3d0747bc5bf34')
+        single_end_mappability_from_sam(EcoliK12DH10B_150sam, outfile=resultfile, chromosome_sizes={'Chromosome':2752,'A_Repeat':991})
+        self.assertEqual(hashlib.sha224(resultfile.getvalue().encode('latin-1')).hexdigest(),'e8e8557a16c05aaa436c2c0fe616450d82a955e0f6de8eb3d190cdf4')
         EcoliK12DH10B_150sam.close()
         resultfile.close()
         pass
