@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name='XenoMapper',
-    version='1.0b6',
+    version='1.0b7',
     author='Matthew Wakefield',
     author_email='matthew.wakefield@unimelb.edu.au',
     packages=['xenomapper'],
