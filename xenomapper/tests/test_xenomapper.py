@@ -90,7 +90,7 @@ class test_main(unittest.TestCase):
                          len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
         self.assertEqual(cat_counts['unassigned'],
                          len(test_unassigned_outfile.getvalue().split('\n'))-4) #26 lines of header in this file
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'a94856a8b209c8293d2bb145f5dfa2b121d8f10964239e32f6427089')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'3512efc4f7b0e37bbcd2871826628ea138112086880461bc2c40cc93')
         sam1.close()
         sam2.close()
         pass
@@ -122,7 +122,7 @@ class test_main(unittest.TestCase):
         self.assertEqual(sum([cat_counts[x] for x in cat_counts if 'secondary_multi' in x \
                         and not 'primary_multi' in x and not 'primary_specific' in x and not 'secondary_specific' in x])*2,
                         len(test_secondary_multi_outfile.getvalue().split('\n'))-1)
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'57058b293da8b3b888f6ac12f0180518004df03191d8d5d2ede74f04')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'ecba2de3e3af9c7405a84ad2a4ebaf194ebfb4df76f45c311c0f681d')
         sam1.close()
         sam2.close()
         pass
@@ -155,7 +155,7 @@ class test_main(unittest.TestCase):
                          len(test_secondary_specific_outfile.getvalue().split('\n'))-27)  #26 lines of header in this file
         self.assertEqual(cat_counts[('unassigned', 'unassigned')]*2, len(test_unassigned_outfile.getvalue().split('\n'))-1)
         
-        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'aa959a5d9f8dae5afc6dc02b63a4b354e4935630ce19248bd627de82')
+        self.assertEqual(hashlib.sha224(test_primary_specific_outfile.getvalue().encode('latin-1')).hexdigest(),'8f5349ac96f194a4600bf0542cb1a6ebf71ada14b8ee0986598d7f58')
         sam1.close()
         sam2.close()
         pass
