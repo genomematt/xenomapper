@@ -173,14 +173,15 @@ def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_g
     mappable_values = []
     for line in samfile:
         name, x, chrom, pos, flag, cigar, mate_chr, mate_pos, insert_size, seq, qual, *tags = line.strip('\n').split()
-        if mappable_chrom != name.split('_')[0]:
+        true_chrom = '_'.join(name.split('_')[:-1]) #name may have _ so we split off last and join
+        if mappable_chrom != true_chrom: #add next chromosome to mappable_chrom if new
             if mappable_chrom and mappable_values:
                 mappable[mappable_chrom] = mappable_values
             mappable_chrom = chrom
             mappable_pos = 0
             mappable_values = []
         mappable_pos += 1
-        name_pos = int(name.split('_')[1])
+        name_pos = int(name.split('_')[-1])
         if name_pos != mappable_pos: #pragma: no cover
             if not name_pos > mappable_pos:
                 raise ValueError('Name is not sequential.  SAM must be in name sorted order Name: {0} Expected: {1}_{2}'.format(name,mappable_chrom,mappable_pos))
@@ -190,7 +191,7 @@ def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_g
                 mappable_pos = name_pos
                 mappable_values.extend([0,]*number_missing)
                 
-        if name.split('_') == [chrom, pos] and flag == '42':
+        if (true_chrom, name_pos) == (chrom, int(pos)) and flag == '42':
             mappable_values.append(1)
         else:
             mappable_values.append(0)
