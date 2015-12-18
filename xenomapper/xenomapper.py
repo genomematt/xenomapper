@@ -598,19 +598,19 @@ def command_line_interface(*args,**kw): #pragma: no cover
     parser.add_argument('--primary_sam',
                         type=argparse.FileType('rt'),
                         default=None,
-                        help='a SAM format Bowtie2 mapping output file corrisponding to the primary species of interest')
+                        help='a SAM format Bowtie2 mapping output file corresponding to the primary species of interest')
     parser.add_argument('--secondary_sam',
                         type=argparse.FileType('rt'),
                         default=None,
-                        help='a SAM format Bowtie2 mapping output file corrisponding to the secondary or contaminating species')
+                        help='a SAM format Bowtie2 mapping output file corresponding to the secondary or contaminating species')
     parser.add_argument('--primary_bam',
                         type=argparse.FileType('rb'),
                         default=None,
-                        help='a BAM format Bowtie2 mapping output file corrisponding to the primary species of interest')
+                        help='a BAM format Bowtie2 mapping output file corresponding to the primary species of interest')
     parser.add_argument('--secondary_bam',
                         type=argparse.FileType('rb'),
                         default=None,
-                        help='a BAM format Bowtie2 mapping output file corrisponding to the secondary or contaminating species')
+                        help='a BAM format Bowtie2 mapping output file corresponding to the secondary or contaminating species')
     parser.add_argument('--primary_specific',
                         type=argparse.FileType('wt'),
                         default=sys.stdout,
