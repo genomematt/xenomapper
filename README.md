@@ -70,16 +70,16 @@ usage:
 	optional arguments:
 	  -h, --help            show this help message and exit
 	  --primary_sam PRIMARY_SAM
-	                        a SAM format Bowtie2 mapping output file corrisponding
+	                        a SAM format Bowtie2 mapping output file corresponding
 	                        to the primary species of interest
 	  --secondary_sam SECONDARY_SAM
-	                        a SAM format Bowtie2 mapping output file corrisponding
+	                        a SAM format Bowtie2 mapping output file corresponding
 	                        to the secondary or contaminating species
 	  --primary_bam PRIMARY_BAM
-	                        a BAM format Bowtie2 mapping output file corrisponding
+	                        a BAM format Bowtie2 mapping output file corresponding
 	                        to the primary species of interest
 	  --secondary_bam SECONDARY_BAM
-	                        a BAM format Bowtie2 mapping output file corrisponding
+	                        a BAM format Bowtie2 mapping output file corresponding
 	                        to the secondary or contaminating species
 	  --primary_specific PRIMARY_SPECIFIC
 	                        name for SAM format output file for reads mapping to a
