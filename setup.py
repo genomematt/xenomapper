@@ -12,14 +12,14 @@ except ImportError:
 
 setup(
     name='XenoMapper',
-    version='1.0b7',
+    version='1.0.0',
     author='Matthew Wakefield',
     author_email='matthew.wakefield@unimelb.edu.au',
     packages=['xenomapper'],
     include_package_data = True,
     install_requires=install_requires,
     url='https://github.com/genomematt/xenomapper.git',
-    license='GPL',
+    license='GPLv3',
     entry_points={
         'console_scripts': ['xenomapper = xenomapper.xenomapper:main',
                             'xenomappability = xenomapper.mappability:main'
@@ -29,12 +29,13 @@ setup(
     description='xenomapper - mapping mixed reads from two species',
     long_description=open('README.md').read(),
     classifiers=[
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
           'Operating System :: POSIX',
           'Programming Language :: Python :: 3 :: Only',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Intended Audience :: Science/Research',

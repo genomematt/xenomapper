@@ -7,7 +7,7 @@ A script for parsing pairs of sam files and returning sam files containing only 
 Used for filtering reads where multiple species may contribute (eg human tissue xenografted into mouse).
 
 Created by Matthew Wakefield.
-Copyright (c) 2011-2015  Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne. All rights reserved.
+Copyright (c) 2011-2016  Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne. All rights reserved.
 
    
    This program is distributed in the hope that it will be useful,
@@ -25,13 +25,13 @@ from collections import Counter
 from copy import copy
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
+__copyright__ = "Copyright 2011-2016 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "1.0b7"
+__version__ = "1.0.0"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
-__status__ = "Beta"
+__status__ = "Production/Stable"
 
 def get_sam_header(samfile):
     line = "@"
