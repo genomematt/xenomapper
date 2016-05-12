@@ -150,7 +150,7 @@ This feature is computationally intensive for useful genomes.  In most cases you
 	
 Citing Xenomapper
 =================
-Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.  The DOI for the current release is [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.16782.svg)](http://dx.doi.org/10.5281/zenodo.16782)
+Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.  The DOI for the current release is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](https://zenodo.org/badge/latestdoi/11450/genomematt/xenomapper)
 
 References
 =================
