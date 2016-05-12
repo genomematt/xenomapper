@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 """
-xenomapper.py
+mappability.py
 
-A script for parsing pairs of sam files and returning sam files containing only reads where no better mapping exist in other files.
+This is an experimental addition to the Xenomapper tool for parsing pairs of sam files and returning 
+sam files containing only reads where no better mapping exist in other files.
 Used for filtering reads where multiple species may contribute (eg human tissue xenografted into mouse).
 
+This file contains functionality for calculating paired end mappability estimates using a distribution
+of insert sizes observed in the data and the probabilistic inference of a pair rescuing an otherwise
+non-unique read.  This process is computationally intensive and in practice only improves mapping as
+very low coverages.
+
+This module should be considered experimental, and unlike the core xenomapper code which has been in
+active use for several years, should be considered beta quality.  Caveat Emptor.
+
 Created by Matthew Wakefield on 2011-12-08.
-Copyright (c) 2011  Matthew Wakefield and The Walter and Eliza Hall Institute. All rights reserved.
+Copyright (c) 2011-2016  Matthew Wakefield and The Walter and Eliza Hall Institute. All rights reserved.
 """
 import sys
 import os
@@ -17,10 +26,10 @@ from collections import Counter
 from xenomapper.xenomapper import get_sam_header
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011-2015 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
+__copyright__ = "Copyright 2011-2016 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
-__license__ = "GPL"
-__version__ = "1.0b7"
+__license__ = "GPLv3"
+__version__ = "1.0.0"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Development"
@@ -205,6 +214,15 @@ def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_g
     pass
 
 def paired_end_mappability(wiggle, mate_density, outfile=sys.stdout, chromosome_sizes={}):
+    """Create a wiggle file of read mappability using inferred mapping rate of pairs
+    Arguments:
+        wiggle           - a wiggle file of mappability
+        mate_density     - an iterable of floats summing to 1 representing
+                           the probability of observing a pair.
+                           (Usually output of mate_distribution_from_sam)
+        outfile          - file object for writing ouput wiggle file
+        chromosome_sizes - a dictionary of chromosome sizes
+    """
     mappable = Mappability(chromosome_sizes=chromosome_sizes)
     chromosomes = list(chromosome_sizes.keys())
     
@@ -235,6 +253,7 @@ def remove_small_values(the_list,relative_limit=0.1):
     return result
     
 def mate_distribution_from_sam(samfile=sys.stdin, sample_size=10000):
+    """Calculate the mate density (distribution) of read pair sizes from a sam file"""
     sizes = []
     for line in samfile:
         if not line or line[0] == '@':
@@ -254,7 +273,8 @@ def mate_distribution_from_sam(samfile=sys.stdin, sample_size=10000):
     return normalised_list(remove_small_values(smoothed_list(mate_density)))
 
 def command_line_interface(): #pragma: no cover
-    parser = argparse.ArgumentParser(description='A script for generating mappability estimates for paired end data.\
+    parser = argparse.ArgumentParser(description='Caution: Experimental - Beta quality functionality.\
+                                                A script for generating mappability estimates for paired end data.\
                                                 Paired end mappability is inferred from single end mappability.\
                                                 Step one is to generate a fasta file of reads from a fasta file using --fasta \
                                                 You then process these reads through your mapping process. \
