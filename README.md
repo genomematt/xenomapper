@@ -25,9 +25,12 @@ Alternatively if you would like to install from the github repository
 
     git clone https://github.com/genomematt/xenomapper
     pip3 install --upgrade xenomapper
+	
+Although the repository tests by continuous integration with TravisCI its good practice to run the tests locally and check your install works correctly.  The tests are run with the following command:
+
     python3 -m xenomapper.tests.test_all
 
-All users should upgrade to v0.5.0 or higher
+All users should upgrade to v0.5.0 or higher as earlier versions have known bugs.
 
 Using Xenomapper
 ================
@@ -133,6 +136,8 @@ To output bam files in a bash shell use process substitution:
     xenomapper --primary_specific >(samtools view -bS - > outfilename.bam)
 
 
+A worked example of using xenomapper can be found in [example_usage.ipynb](example_usage.ipynb)
+
 xenomappability
 ===============
 xenomappability is a tool for creating mappability wiggle files that reflect the paired end and multi species nature of the final number more accurately than the commonly used single end mappability tracks.
@@ -148,6 +153,12 @@ This feature is computationally intensive for useful genomes.  In most cases you
     xenomappability --mapped_test_data tests/data/test_from_EcoliK12DH10B_10reads.sam > tests/data/test_from_EcoliK12DH10B_10reads.wig
     xenomappability --single_end_wiggle tests/data/test_from_EcoliK12DH10B_10reads.wig --sam_for_sizes tests/data/paired_end_testdata_human.sam`
 	
+Contributing to Xenomapper
+==========================
+Xenomapper is licensed under the GPLv3.  You are free to fork this repository under the terms of that license.  If you have suggested changes please start by raising an issue in the issue tracker.  Pull requests are welcome and will be included at the discretion of the author, but must have 100% test coverage.
+Bug reports should be made to the issue tracker.  Difficulty in understanding how to use the software is a documentation bug, and should also be raised on the issue tracker with the tag `question` so your question and my response are easily found by others.
+
+
 Citing Xenomapper
 =================
 Currently Xenomapper is unpublished, but this repository does have a DOI identifier for each release you can use to cite the code.  The DOI for the current release is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](https://zenodo.org/badge/latestdoi/11450/genomematt/xenomapper)
@@ -155,5 +166,6 @@ Currently Xenomapper is unpublished, but this repository does have a DOI identif
 References
 =================
 Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012, 9:357-359. http://bowtie-bio.sourceforge.net/bowtie2/
+
 Kim D, Langmead B, Salzberg SL. HISAT: a fast spliced aligner with low memory requirements. Nat Methods. 2015 12:357-60. https://github.com/infphilo/hisat
 
