@@ -22,7 +22,7 @@ Use cases include xenografts of human cancers and host pathogen interactions.
 
 Xenomapper is most effective with mapped reads that include an XS or ZS score that gives the mapping score of the next best read. These include Bowtie2 [@BOWTIE2] and HISAT [@HISAT].
 
-This work builds upon similar a approaches by Rossello et. al. [@ROSSELLO] with a more rigorous implementation and extensions for paired end data and exon aware aligners.
+This work builds upon a similar approach by Rossello et. al. [@ROSSELLO] with a more rigorous implementation and extensions for paired end data and exon aware aligners.
 
 # References
 
