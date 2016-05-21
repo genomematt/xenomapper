@@ -443,7 +443,7 @@ def main_paired_end(readpairs,
         elif forward_state == 'unassigned' or reverse_state == 'unassigned':
             if unassigned:
                 print('\t'.join(previous_line1),file=unassigned) 
-                print('\t'.join(line1),file=unresolved)
+                print('\t'.join(line1),file=unassigned)
         else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state)) # pragma: no cover
         
         previous_line1 = line1
