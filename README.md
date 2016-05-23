@@ -2,6 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/genomematt/xenomapper/badge.svg)](https://coveralls.io/r/genomematt/xenomapper)
 [![JOSS](http://joss.theoj.org/papers/7065e20e97ff4e44695b5e9fef7cdcd8/status.svg)](http://dx.doi.org/10.21105.joss.00018)
 [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](https://zenodo.org/badge/latestdoi/11450/genomematt/xenomapper)
+[![DOI](https://img.shields.io/pypi/v/xenomapper.svg)](https://pypi.python.org/pypi/XenoMapper/)
 
 Xenomapper
 ==========
