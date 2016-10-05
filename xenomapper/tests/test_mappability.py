@@ -32,7 +32,7 @@ class test_mappability(unittest.TestCase):
         testdata = io.StringIO('>firstsequence\nGACAT\n>secondsequence\nGNATCAT')
         self.assertEqual(list(parse_fasta(testdata)),[('firstsequence', 'GACAT'), ('secondsequence', 'GNATCAT')])
         pass
-    
+
     def test_simulate_reads(self):
         outputfasta = io.StringIO()
         inputfastafile = io.TextIOWrapper(resource_stream(__name__, 'data/test_from_EcoliK12DH10B.fasta'))

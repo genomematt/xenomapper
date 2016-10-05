@@ -90,7 +90,7 @@ def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False): #pragma: no c
 
 def getReadPairs(sam1,sam2, skip_repeated_reads=False):
     """Process two sam files to yield the equivalent line from each file
-        Arguments: 
+        Arguments:
         sam1, sam2  - file or file like objects in ascii sam format
                       containing the same reads in the same order
                       mapped in two different species
@@ -461,7 +461,7 @@ def conservative_main_paired_end(readpairs,
     """Main loop for conservative processing of paired end read files.
     Read pairs where either read is unassigned will be deemed unassigned.
     This places features such as transgene boundaries in the unassigned file.
-    Reads with discordant species will be unresolved. 
+    Reads with discordant species will be unresolved.
     Concordant reads will be assigned to the highest priority category in the
     order: primary_specific, secondary_specific, primary_multi,
     secondary_multi, unresolved, unassigned
@@ -516,7 +516,7 @@ def conservative_main_paired_end(readpairs,
         category_counts[(forward_state,reverse_state)] += 1
         if forward_state == 'unassigned' or reverse_state == 'unassigned':
             if unassigned:
-                print('\t'.join(previous_line1),file=unassigned) 
+                print('\t'.join(previous_line1),file=unassigned)
                 print('\t'.join(line1),file=unassigned)
         elif forward_state == 'unresloved' or reverse_state == 'unresolved' \
             or (forward_state in ['primary_specific','primary_multi'] and \
@@ -524,25 +524,25 @@ def conservative_main_paired_end(readpairs,
             or (forward_state in ['secondary_specific','secondary_multi'] and \
                 reverse_state in ['primary_specific','primary_multi']):
             if unresolved:
-                print('\t'.join(previous_line1),file=unresolved) 
+                print('\t'.join(previous_line1),file=unresolved)
                 print('\t'.join(line1),file=unresolved)
-                print('\t'.join(previous_line2),file=unresolved) 
+                print('\t'.join(previous_line2),file=unresolved)
                 print('\t'.join(line2),file=unresolved)
         elif forward_state == 'primary_specific' or reverse_state == 'primary_specific':
             if primary_specific:
-                print('\t'.join(previous_line1),file=primary_specific) 
+                print('\t'.join(previous_line1),file=primary_specific)
                 print('\t'.join(line1),file=primary_specific)
         elif forward_state == 'secondary_specific' or reverse_state == 'secondary_specific':
             if secondary_specific:
-                print('\t'.join(previous_line2),file=secondary_specific) 
+                print('\t'.join(previous_line2),file=secondary_specific)
                 print('\t'.join(line2),file=secondary_specific)
         elif forward_state == 'primary_multi' or reverse_state == 'primary_multi':
             if primary_multi:
-                print('\t'.join(previous_line1),file=primary_multi) 
+                print('\t'.join(previous_line1),file=primary_multi)
                 print('\t'.join(line1),file=primary_multi)
         elif forward_state == 'secondary_multi' or reverse_state == 'secondary_multi':
             if secondary_multi:
-                print('\t'.join(previous_line2),file=secondary_multi) 
+                print('\t'.join(previous_line2),file=secondary_multi)
                 print('\t'.join(line2),file=secondary_multi)
         else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state)) # pragma: no cover
         

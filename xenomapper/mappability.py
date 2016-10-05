@@ -54,7 +54,7 @@ class Mappability(dict):
                 for score in self[chrom]:
                     print(str(score), file=wigglefile)
         pass
-    
+
     def from_wiggle(self,wigglefile=sys.stdin,datatype=float):
         """Load mapability data from a wiggle file
         The wiggle file must be fixed step format, step of one and start at 1
