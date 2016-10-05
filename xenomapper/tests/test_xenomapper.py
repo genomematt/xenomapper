@@ -25,7 +25,7 @@ __status__ = "Production/Stable"
 class test_main(unittest.TestCase):
     def setUp(self):
         pass
-    
+
     def test_process_headers(self):
         test_primary_specific_outfile = io.StringIO()
         test_secondary_specific_outfile = io.StringIO()

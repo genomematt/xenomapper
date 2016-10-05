@@ -3,7 +3,7 @@
 """
 mappability.py
 
-This is an experimental addition to the Xenomapper tool for parsing pairs of sam files and returning 
+This is an experimental addition to the Xenomapper tool for parsing pairs of sam files and returning
 sam files containing only reads where no better mapping exist in other files.
 Used for filtering reads where multiple species may contribute (eg human tissue xenografted into mouse).
 
@@ -42,7 +42,7 @@ class Mappability(dict):
                 self[chrom] = [0,]*chromosome_sizes[chrom]
         self.chromosome_sizes = chromosome_sizes
         pass
-    
+
     def to_wiggle(self, wigglefile=sys.stdout, chromosomes=[]):
         """Output mappability data to file in wiggle format"""
         ## Wiggle file format is:
@@ -110,7 +110,7 @@ class Mappability(dict):
         
         #should sum to 1 but allow for numerical error
         #summing to 1 is not algorythmically essential
-        assert abs(sum(mate_density)-1.0) < 0.000001 
+        assert abs(sum(mate_density)-1.0) < 0.000001
         
         paired_mappability = Mappability(chromosome_sizes = self.chromosome_sizes)
         
@@ -132,7 +132,7 @@ def parse_fasta(fastafile, token='>'):
     """
     with fastafile as f:
         seq = None
-        name = None   
+        name = None
         for line in f:
             line = line.strip()
             if line.startswith(token):

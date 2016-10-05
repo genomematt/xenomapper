@@ -27,7 +27,7 @@ __status__ = "Development/Beta"
 class test_mappability(unittest.TestCase):
     def setUp(self):
         pass
-    
+
     def test_parse_fasta(self):
         testdata = io.StringIO('>firstsequence\nGACAT\n>secondsequence\nGNATCAT')
         self.assertEqual(list(parse_fasta(testdata)),[('firstsequence', 'GACAT'), ('secondsequence', 'GNATCAT')])

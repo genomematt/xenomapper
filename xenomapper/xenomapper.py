@@ -9,7 +9,7 @@ Used for filtering reads where multiple species may contribute (eg human tissue 
 Created by Matthew Wakefield.
 Copyright (c) 2011-2016  Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne. All rights reserved.
 
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -65,7 +65,7 @@ def bam_lines(f): #pragma: no cover #not tested due to need for samtools
 
 def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False): #pragma: no cover #not tested due to need for samtools
     """Process two bamfiles to yield the equivalent line from each file
-        Arguments: 
+        Arguments:
         bamfile1, bamfile2  - file or file like objects in binary bam format
                               containing the same reads in the same order
                               mapped in two different species
@@ -200,7 +200,7 @@ def get_tag_with_ZS_as_XS(sam_line,tag='AS'):
                     or -inf if tag is not present.
     """
     if tag == 'XS':
-        tag = 'ZS' 
+        tag = 'ZS'
     return get_tag(sam_line,tag)
 
 #def alternative_get_tag(sam_line,tag='AS'):
@@ -246,7 +246,7 @@ def get_cigarbased_AS_tag(sam_line,tag='AS'):
     if not NM:
         return float('-inf') #either a multimapper or unmapped
     mismatches = int(NM[0].split(':')[-1])
-    cigar = re.findall(r'([0-9]+)([MIDNSHPX=])',sam_line[5]) 
+    cigar = re.findall(r'([0-9]+)([MIDNSHPX=])',sam_line[5])
     deletions = [int(x[0]) for x in cigar if x[1] == 'D']
     insertions = [int(x[0]) for x in cigar if x[1] == 'I']
     softclips = [int(x[0]) for x in cigar if x[1] == 'S']
@@ -276,7 +276,7 @@ def get_mapping_state(AS1,XS1,AS2,XS2, min_score=float('-inf')):
         if not XS1 or AS1 > XS1:       #maps uniquely in primary better than secondary
             return 'primary_specific'
         else:            #multimaps in primary better than secondary
-            return 'primary_multi' 
+            return 'primary_multi'
     elif AS1 == AS2:                   #maps equally well in both
         return 'unresolved'
     elif AS2 > min_score and (AS1 <= min_score or AS2 > AS1): #maps in secondary better than primary
@@ -364,7 +364,7 @@ def main_paired_end(readpairs,
     secondary_specific, primary_multi, secondary_multi,
     unresolved, unassigned
     
-    This will rescue unresolved or unassigned reads where the second read 
+    This will rescue unresolved or unassigned reads where the second read
     can be assigned, and deems primary/secondary discordant reads as
     primary.
     
@@ -420,29 +420,29 @@ def main_paired_end(readpairs,
         
         if forward_state == 'primary_specific' or reverse_state == 'primary_specific':
             if primary_specific:
-                print('\t'.join(previous_line1),file=primary_specific) 
+                print('\t'.join(previous_line1),file=primary_specific)
                 print('\t'.join(line1),file=primary_specific)
         elif forward_state == 'secondary_specific' or reverse_state == 'secondary_specific':
             if secondary_specific:
-                print('\t'.join(previous_line2),file=secondary_specific) 
+                print('\t'.join(previous_line2),file=secondary_specific)
                 print('\t'.join(line2),file=secondary_specific)
         elif forward_state == 'primary_multi' or reverse_state == 'primary_multi':
             if primary_multi:
-                print('\t'.join(previous_line1),file=primary_multi) 
+                print('\t'.join(previous_line1),file=primary_multi)
                 print('\t'.join(line1),file=primary_multi)
         elif forward_state == 'secondary_multi' or reverse_state == 'secondary_multi':
             if secondary_multi:
-                print('\t'.join(previous_line2),file=secondary_multi) 
+                print('\t'.join(previous_line2),file=secondary_multi)
                 print('\t'.join(line2),file=secondary_multi)
         elif forward_state == 'unresloved' or reverse_state == 'unresolved':
             if unresolved:
-                print('\t'.join(previous_line1),file=unresolved) 
+                print('\t'.join(previous_line1),file=unresolved)
                 print('\t'.join(line1),file=unresolved)
-                print('\t'.join(previous_line2),file=unresolved) 
+                print('\t'.join(previous_line2),file=unresolved)
                 print('\t'.join(line2),file=unresolved)
         elif forward_state == 'unassigned' or reverse_state == 'unassigned':
             if unassigned:
-                print('\t'.join(previous_line1),file=unassigned) 
+                print('\t'.join(previous_line1),file=unassigned)
                 print('\t'.join(line1),file=unassigned)
         else: raise RuntimeError('Unexpected states forward:{0} reverse:{1}'.format(forward_state,reverse_state)) # pragma: no cover
         
@@ -464,8 +464,8 @@ def conservative_main_paired_end(readpairs,
     Read pairs where either read is unassigned will be deemed unassigned.
     This places features such as transgene boundaries in the unassigned file.
     Reads with discordant species will be unresolved. 
-    Concordant reads will be assigned to the highest priority category in the 
-    order: primary_specific, secondary_specific, primary_multi, 
+    Concordant reads will be assigned to the highest priority category in the
+    order: primary_specific, secondary_specific, primary_multi,
     secondary_multi, unresolved, unassigned
     
     Paired end reads must be sequential in the sam or bam file, occur only once
@@ -742,5 +742,5 @@ def main(): #pragma: no cover
 
 
 if __name__ == '__main__': #pragma: no cover
-    main() 
+    main()
     
