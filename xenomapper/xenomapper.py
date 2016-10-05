@@ -17,7 +17,6 @@ Copyright (c) 2011-2016  Matthew Wakefield, The Walter and Eliza Hall Institute 
 
 """
 import sys
-import os
 import argparse, textwrap
 import subprocess
 import re

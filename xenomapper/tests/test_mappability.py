@@ -8,7 +8,7 @@ Copyright (c) 2012 Matthew Wakefield and The Walter and Eliza Hall Institute. Al
 """
 
 import unittest
-import sys, io
+import io
 from xenomapper.mappability import *
 import hashlib
 from pkg_resources import resource_stream

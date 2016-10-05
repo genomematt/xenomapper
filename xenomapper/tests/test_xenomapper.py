@@ -8,7 +8,7 @@ Copyright (c) 2011-2016 Matthew Wakefield and The Walter and Eliza Hall Institut
 """
 
 import unittest
-import sys, io
+import io
 from xenomapper.xenomapper import *
 import hashlib
 from pkg_resources import resource_stream

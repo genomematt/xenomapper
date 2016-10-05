@@ -19,7 +19,6 @@ Created by Matthew Wakefield on 2011-12-08.
 Copyright (c) 2011-2016  Matthew Wakefield and The Walter and Eliza Hall Institute. All rights reserved.
 """
 import sys
-import os
 import argparse
 from statistics import *
 from collections import Counter
