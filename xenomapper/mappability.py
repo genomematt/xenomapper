@@ -35,14 +35,14 @@ __status__ = "Development"
 
 
 class Mappability(dict):
-    def __init__(self, chromosome_sizes = {}):
+    def __init__(self, chromosome_sizes = None):
         if chromosome_sizes:
             for chrom in chromosome_sizes:
                 self[chrom] = [0,]*chromosome_sizes[chrom]
-        self.chromosome_sizes = chromosome_sizes
+        self.chromosome_sizes = chromosome_sizes if chromosome_sizes else {}
         pass
 
-    def to_wiggle(self, wigglefile=sys.stdout, chromosomes=[]):
+    def to_wiggle(self, wigglefile=sys.stdout, chromosomes=None):
         """Output mappability data to file in wiggle format"""
         ## Wiggle file format is:
         #fixedStep chrom=chrN start=pos step=1
@@ -90,7 +90,7 @@ class Mappability(dict):
             self.chromosome_sizes[chrom]=len(self[chrom])
         pass
     
-    def single_end_to_paired(self, mate_density = [1,]):
+    def single_end_to_paired(self, mate_density = None):
         """Produce a new mappability object with paired end mapping probilities
         Defines paired end mappability as either end being uniquely mappable.
         Arguments:
@@ -98,6 +98,9 @@ class Mappability(dict):
                             First entry corresponds to current position
                             all entries must sum to 1.0
         """
+        if not mate_density:
+            mate_density = [1,]
+        
         def _mappability_by_mate_density(mapability,mate_density):
             #defined as local scope function as may be replaced for speed.
             result = 0.0
@@ -171,7 +174,7 @@ def simulate_reads(fastafile, readlength=100, outfile=sys.stdout):
             outfile.write(format_fasta(newname,seq[x:x+readlength]))
     pass
 
-def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_gaps=True, chromosome_sizes = {}):
+def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_gaps=True, chromosome_sizes = None):
     mappable = Mappability(chromosome_sizes=chromosome_sizes)
     
     #parse sam data and add to object
