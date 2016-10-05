@@ -215,7 +215,7 @@ def single_end_mappability_from_sam(samfile, outfile=sys.stdout, fill_sequence_g
     
     pass
 
-def paired_end_mappability(wiggle, mate_density, outfile=sys.stdout, chromosome_sizes={}):
+def paired_end_mappability(wiggle, mate_density, outfile=sys.stdout, chromosome_sizes=None):
     """Create a wiggle file of read mappability using inferred mapping rate of pairs
     Arguments:
         wiggle           - a wiggle file of mappability
