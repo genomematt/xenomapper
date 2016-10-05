@@ -58,7 +58,6 @@ def bam_lines(f): #pragma: no cover #not tested due to need for samtools
         Yields:    ascii sam file lines
     """
     p = subprocess.Popen('samtools view -',stdin=f,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
-    header_lines = []
     for line in p.stdout:
         yield line.decode('ascii')
 
