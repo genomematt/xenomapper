@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/genomematt/xenomapper.svg?branch=master)](https://travis-ci.org/genomematt/xenomapper)
 [![Coverage Status](https://coveralls.io/repos/genomematt/xenomapper/badge.svg)](https://coveralls.io/r/genomematt/xenomapper)
-[![JOSS](http://joss.theoj.org/papers/7065e20e97ff4e44695b5e9fef7cdcd8/status.svg)](http://dx.doi.org/10.21105.joss.00018)
+[![JOSS](http://joss.theoj.org/papers/7065e20e97ff4e44695b5e9fef7cdcd8/status.svg)](http://dx.doi.org/10.21105/joss.00018)
 [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](https://zenodo.org/badge/latestdoi/11450/genomematt/xenomapper)
 [![DOI](https://img.shields.io/pypi/v/xenomapper.svg)](https://pypi.python.org/pypi/XenoMapper/)
 
@@ -164,7 +164,7 @@ Bug reports should be made to the issue tracker.  Difficulty in understanding ho
 Citing Xenomapper
 =================
 
-Xenomapper is published in the Journal of Open Source Software.  Please cite the paper in academic publications [DOI:10.21105.joss.00018](http://dx.doi.org/10.21105.joss.00018).  Each release also has a Zenodo DOI identifier for each release.  In an ideal world this is what you would cite to indicate the code you use, and make everything more reproducible but academic credit is better served at the moment by the paper. Try and include the Zenodo DOI or a version number in your methods.  The DOI for the current release is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](https://zenodo.org/badge/latestdoi/11450/genomematt/xenomapper)
+Xenomapper is published in the Journal of Open Source Software.  Please cite the paper in academic publications [DOI:10.21105.joss.00018](http://dx.doi.org/10.21105/joss.00018).  Each release also has a Zenodo DOI identifier for each release.  In an ideal world this is what you would cite to indicate the code you use, and make everything more reproducible but academic credit is better served at the moment by the paper. Try and include the Zenodo DOI or a version number in your methods.  The DOI for the current release is [![DOI](https://zenodo.org/badge/11450/genomematt/xenomapper.svg)](https://zenodo.org/badge/latestdoi/11450/genomematt/xenomapper)
 
 References
 =================
