@@ -6,3 +6,4 @@
 
 #ignore egg info files
 XenoMapper.egg-info
+dist/
