@@ -33,6 +33,81 @@ __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Production/Stable"
 
+class SAMFile():
+    def __init__(self, sam_file):
+        self.sam_file = sam_file
+        self.header = self.get_sam_header()
+    
+    def __iterator__(self):
+        return self
+
+    def __next__(self):
+        return self.sam_file.readline().strip('\n').split()
+    
+    def get_sam_header(self):
+        line = "@"
+        header = []
+        pointer = 0
+        while line[0] == '@':
+            pointer = self.sam_file.tell()
+            line = self.sam_file.readline().strip('\n')
+            if line[0] == '@':
+                header.append(line)
+        self.sam_file.seek(pointer) #set file to first line after header
+        return header
+    
+    def get_read(self):
+        return self.__next__()
+    
+    def close(self):
+        return self.sam_file.close()
+    
+    def tell(self):
+        return self.sam_file.tell()
+
+    def seek(self, *args, **kw):
+        return self.sam_file.seek(*args, **kw)
+    
+    def readline(self):
+        return self.sam_file.readline()
+
+class BAMFile():
+    def __init__(self, bam_file):
+        self.bam_file = bam_file
+        self.header = self.get_bam_header()
+        self._samtools = subprocess.Popen('samtools view -',
+                                        stdin=self.bam_file,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        shell=True)
+
+    def __iterator__(self):
+        return self
+
+    def __next__(self):
+        return next(self._samtools.stdout).decode('ascii')
+    
+    def get_bam_header(self): #pragma: no cover #not tested due to need for samtools
+        p = subprocess.Popen('samtools view -H -',stdin=self.bam_file,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+        header = []
+        for line in p.stdout:
+            header.append(line.decode('ascii'))
+        self.bam_file.seek(0) #reset to start of file for next samtools call
+        return [x.strip('\n') for x in header]
+    
+    def get_read(self):
+        return self.__next__()
+
+    def close(self):
+        return self.bam_file.close()
+    
+    def tell(self):
+        return self.bam_file.tell()
+
+    def seek(self, *args, **kw):
+        return self.bam_file.seek(*args, **kw)
+
+
 def get_sam_header(samfile):
     line = "@"
     header = []

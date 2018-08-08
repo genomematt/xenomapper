@@ -26,6 +26,27 @@ class test_main(unittest.TestCase):
     def setUp(self):
         pass
     
+    def test_SAMFile(self):
+        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
+        human_reads = SAMFile(sam1)
+        self.assertEqual(human_reads.header[:3], ['@HD\tVN:1.0\tSO:unsorted', '@SQ\tSN:MT\tLN:16569', '@SQ\tSN:1\tLN:249250621'] )
+        self.assertEqual(human_reads.get_read(),
+                    ['HWI-ST960:96:COTO3ACXX:3:1101:1220:2089', '83', '12', '133186150', '38', '99M1S', '=', '133186079', '-173',
+                    'GTGCATCCCGGTAGTCCCAGCTACTTAGGAGGCTGAGGCAGGAGAATCGCTTGAACCCTGGAGGCAAAGGTTGCAGTGAGCCGAGATCACACCACTACAN',
+                    'DCDDB@DDDDCCBB?DDEEEDDECDCFFHHHHHJIIGHJJJJJJJIHIIJIIHDBJJJJJJJJIIIJJJIGHHJJJJIJJIJIGJJIHHFFHFDDDD=1#',
+                    'AS:i:198', 'XS:i:126', 'XN:i:0', 'XM:i:0', 'XO:i:0', 'XG:i:0', 'NM:i:0', 'MD:Z:99', 'YS:i:189', 'YT:Z:CP']
+                    )
+        self.assertEqual(next(human_reads),    
+                    ['HWI-ST960:96:COTO3ACXX:3:1101:1220:2089', '163', '12', '133186079', '38', '3S97M', '=', '133186150', '173',
+                    'NNNTTCAAAACCAGCCTGACCAACATGGTGAAACCCTGTCTCTACTAAAAATACAAAATTAGCTGGGTGTGGTGGTGCATCCTGGTAGTCCCAGCTACTT',
+                    '###44ADFHGHFHJIJJJJJJJJJJJJJEGHIJJJJJJIJJJIJJJIJHIHHIIIHJJJJIJIIJJJCHEEFDDDABDDED?--:>ACCDDDCDDC@CCD',
+                    'AS:i:189', 'XS:i:50', 'XN:i:0', 'XM:i:1', 'XO:i:0', 'XG:i:0', 'NM:i:1', 'MD:Z:79C17', 'YS:i:198', 'YT:Z:CP'],
+                    )
+        self.assertEqual(human_reads.tell(),1342)
+        human_reads.seek(0,2)
+        self.assertEqual(next(human_reads),[])
+        human_reads.close() 
+    
     def test_process_headers(self):
         test_primary_specific_outfile = io.StringIO()
         test_secondary_specific_outfile = io.StringIO()
