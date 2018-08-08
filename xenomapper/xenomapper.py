@@ -121,7 +121,9 @@ def get_sam_header(samfile):
     return header
 
 def get_bam_header(bamfile): #pragma: no cover #not tested due to need for samtools
-    p = subprocess.Popen('samtools view -H -',stdin=bamfile,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
+    p = subprocess.Popen('samtools view -H -',
+                        stdin=bamfile,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                        shell=True)
     header = []
     for line in p.stdout:
         header.append(line.decode('ascii'))
@@ -133,8 +135,9 @@ def bam_lines(f): #pragma: no cover #not tested due to need for samtools
         Arguments: a file or file like object in bam format
         Yields:    ascii sam file lines
     """
-    p = subprocess.Popen('samtools view -',stdin=f,stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
-    header_lines = []
+    p = subprocess.Popen('samtools view -',
+                        stdin=f,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                        shell=True)
     for line in p.stdout:
         yield line.decode('ascii')
 
@@ -215,36 +218,31 @@ def process_headers(file1,file2, primary_specific=sys.stdout, secondary_specific
         bam           - Boolean flag indicating file1 & file2 are
                         in binary bam format.  Default = False
     """
-    if bam: #pragma: no cover
-        samheader1 = get_bam_header(file1)
-        samheader2 = get_bam_header(file2)
-    else:
-        samheader1 = get_sam_header(file1)
-        samheader2 = get_sam_header(file2)
-    print('\n'.join(add_pg_tag(samheader1,
+    #output header information into the open output files
+    print('\n'.join(add_pg_tag(file1.header,
                     comment='species specific reads'
                     )), file=primary_specific)
     if secondary_specific:
-        print('\n'.join(add_pg_tag(samheader2,
+        print('\n'.join(add_pg_tag(file2.header,
                     comment='species specific reads'
                     )), file=secondary_specific)
     if primary_multi:
-        print('\n'.join(add_pg_tag(samheader1,
+        print('\n'.join(add_pg_tag(file1.header,
                     comment='species specific multimapping reads'
                     )), file=primary_multi)
     if secondary_multi:
-        print('\n'.join(add_pg_tag(samheader2,
+        print('\n'.join(add_pg_tag(file2.header,
                     comment='species specific multimapping reads'
                     )), file=secondary_multi)
     if unassigned:
-        print('\n'.join(add_pg_tag(samheader1,
+        print('\n'.join(add_pg_tag(file1.header,
                     comment='reads that could not be assigned'
                     )), file=unassigned)
     if unresolved: #This will not be the correct header - Look into merging header 1 and 2
-        print('\n'.join(add_pg_tag(samheader1,
+        print('\n'.join(add_pg_tag(file1.header,
                     comment='reads that could not be resolved'
                     )), file=unresolved)
-    pass
+    return file1, file2
 
 def get_tag(sam_line,tag='AS'):
     """Return the value of a SAM tag field
@@ -764,17 +762,17 @@ def main(): #pragma: no cover
     skip_repeated = False if args.paired else True
     
     if args.primary_sam:
-        process_headers(args.primary_sam,args.secondary_sam,
+        primary_readfile, secondary_readfile = process_headers(
+                            SAMFile(args.primary_sam), SAMFile(args.secondary_sam),
                             primary_specific=args.primary_specific,
                             secondary_specific=args.secondary_specific,
                             primary_multi=args.primary_multi,
                             secondary_multi=args.secondary_multi,
                             unassigned=args.unassigned,
                             unresolved=args.unresolved)
-                        
-        readpairs = getReadPairs(args.primary_sam, args.secondary_sam, skip_repeated_reads=skip_repeated)
     else:
-        process_headers(args.primary_bam,args.secondary_bam,
+        primary_readfile, secondary_readfile = process_headers(
+                            BAMFile(args.primary_bam),BAMFile(args.secondary_bam),
                             primary_specific=args.primary_specific,
                             secondary_specific=args.secondary_specific,
                             primary_multi=args.primary_multi,
@@ -783,7 +781,7 @@ def main(): #pragma: no cover
                             unresolved=args.unresolved,
                             bam=True)
                         
-        readpairs = getBamReadPairs(args.primary_bam, args.secondary_bam, skip_repeated_reads=skip_repeated)
+    readpairs = getBamReadPairs(primary_readfile, secondary_readfile, skip_repeated_reads=skip_repeated)
         
     
     if args.paired:

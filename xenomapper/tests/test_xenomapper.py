@@ -54,8 +54,8 @@ class test_main(unittest.TestCase):
         test_secondary_multi_outfile = io.StringIO()
         test_unassigned_outfile = io.StringIO()
         test_unresolved_outfile = io.StringIO()
-        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
-        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
+        sam1 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam')))
+        sam2 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam')))
         process_headers(sam1,sam2,
                      primary_specific=test_primary_specific_outfile,
                      secondary_specific=test_secondary_specific_outfile,
@@ -81,8 +81,8 @@ class test_main(unittest.TestCase):
         test_secondary_multi_outfile = io.StringIO()
         test_unassigned_outfile = io.StringIO()
         test_unresolved_outfile = io.StringIO()
-        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/test_human_in.sam'))
-        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/test_mouse_in.sam'))
+        sam1 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/test_human_in.sam')))
+        sam2 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/test_mouse_in.sam')))
         process_headers(sam1,sam2,
                          primary_specific=test_primary_specific_outfile,
                          secondary_specific=test_secondary_specific_outfile,
@@ -123,8 +123,8 @@ class test_main(unittest.TestCase):
         test_secondary_multi_outfile = io.StringIO()
         test_unassigned_outfile = io.StringIO()
         test_unresolved_outfile = io.StringIO()
-        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
-        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
+        sam1 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam')))
+        sam2 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam')))
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
         cat_counts = main_paired_end(getReadPairs(sam1,sam2),
                                      primary_specific=test_primary_specific_outfile,
@@ -155,8 +155,8 @@ class test_main(unittest.TestCase):
         test_secondary_multi_outfile = io.StringIO()
         test_unassigned_outfile = io.StringIO()
         test_unresolved_outfile = io.StringIO()
-        sam1 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam'))
-        sam2 = io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam'))
+        sam1 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_human.sam')))
+        sam2 = SAMFile(io.TextIOWrapper(resource_stream(__name__, 'data/paired_end_testdata_mouse.sam')))
         process_headers(sam1,sam2,primary_specific=test_primary_specific_outfile, secondary_specific=test_secondary_specific_outfile)
         cat_counts = conservative_main_paired_end(getReadPairs(sam1,sam2),
                                                  primary_specific=test_primary_specific_outfile,
