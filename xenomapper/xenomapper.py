@@ -434,7 +434,7 @@ def main_paired_end(readpairs,
             if secondary_multi:
                 print('\t'.join(previous_line2),file=secondary_multi) 
                 print('\t'.join(line2),file=secondary_multi)
-        elif forward_state == 'unresloved' or reverse_state == 'unresolved':
+        elif forward_state == 'unresolved' or reverse_state == 'unresolved':
             if unresolved:
                 print('\t'.join(previous_line1),file=unresolved) 
                 print('\t'.join(line1),file=unresolved)
@@ -520,7 +520,7 @@ def conservative_main_paired_end(readpairs,
             if unassigned:
                 print('\t'.join(previous_line1),file=unassigned) 
                 print('\t'.join(line1),file=unassigned)
-        elif forward_state == 'unresloved' or reverse_state == 'unresolved' \
+        elif forward_state == 'unresolved' or reverse_state == 'unresolved' \
             or (forward_state in ['primary_specific','primary_multi'] and \
                 reverse_state in ['secondary_specific','secondary_multi']) \
             or (forward_state in ['secondary_specific','secondary_multi'] and \
