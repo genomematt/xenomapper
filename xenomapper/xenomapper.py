@@ -25,10 +25,10 @@ from collections import Counter
 from copy import copy
 
 __author__ = "Matthew Wakefield"
-__copyright__ = "Copyright 2011-2016 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
+__copyright__ = "Copyright 2011-2019 Matthew Wakefield, The Walter and Eliza Hall Institute and The University of Melbourne"
 __credits__ = ["Matthew Wakefield",]
 __license__ = "GPL"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __maintainer__ = "Matthew Wakefield"
 __email__ = "wakefield@wehi.edu.au"
 __status__ = "Production/Stable"
@@ -73,22 +73,24 @@ def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False): #pragma: no c
     """
     bam1 = bam_lines(bamfile1)
     bam2 = bam_lines(bamfile2)
-    line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
-    line2= next(bam2).strip('\n').split()
-    while line1 and line2 and line1 !=[''] and line2 !=['']:
-        assert line1[0] == line2[0]
-        yield line1,line2
-        previous_read1 = line1[0]
-        previous_read2 = line2[0]
-        if skip_repeated_reads:
-            while line1 and line2 and line1 !=[''] and line2 !=[''] and line1[0] == previous_read1:
+    try:
+        line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
+        line2= next(bam2).strip('\n').split()
+        while line1 and line2 and line1 !=[''] and line2 !=['']:
+            assert line1[0] == line2[0]
+            yield line1,line2
+            previous_read1 = line1[0]
+            previous_read2 = line2[0]
+            if skip_repeated_reads:
+                while line1 and line2 and line1 !=[''] and line2 !=[''] and line1[0] == previous_read1:
+                    line1= next(bam1).strip('\n').split()
+                while line1 and line2 and line1 !=[''] and line2 !=[''] and line2[0] == previous_read2:
+                    line2= next(bam2).strip('\n').split()
+            else:
                 line1= next(bam1).strip('\n').split()
-            while line1 and line2 and line1 !=[''] and line2 !=[''] and line2[0] == previous_read2:
                 line2= next(bam2).strip('\n').split()
-        else:
-            line1= next(bam1).strip('\n').split()
-            line2= next(bam2).strip('\n').split()
-    pass
+    except StopIteration:
+        return
 
 def getReadPairs(sam1,sam2, skip_repeated_reads=False):
     """Process two sam files to yield the equivalent line from each file
@@ -434,7 +436,7 @@ def main_paired_end(readpairs,
             if secondary_multi:
                 print('\t'.join(previous_line2),file=secondary_multi) 
                 print('\t'.join(line2),file=secondary_multi)
-        elif forward_state == 'unresloved' or reverse_state == 'unresolved':
+        elif forward_state == 'unresolved' or reverse_state == 'unresolved':
             if unresolved:
                 print('\t'.join(previous_line1),file=unresolved) 
                 print('\t'.join(line1),file=unresolved)
@@ -520,7 +522,7 @@ def conservative_main_paired_end(readpairs,
             if unassigned:
                 print('\t'.join(previous_line1),file=unassigned) 
                 print('\t'.join(line1),file=unassigned)
-        elif forward_state == 'unresloved' or reverse_state == 'unresolved' \
+        elif forward_state == 'unresolved' or reverse_state == 'unresolved' \
             or (forward_state in ['primary_specific','primary_multi'] and \
                 reverse_state in ['secondary_specific','secondary_multi']) \
             or (forward_state in ['secondary_specific','secondary_multi'] and \

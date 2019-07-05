@@ -6,3 +6,10 @@
 
 #ignore egg info files
 XenoMapper.egg-info
+\.eggs/
+
+\.pytest_cache/v/cache/
+
+\.vscode/
+
+dist/
