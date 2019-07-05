@@ -73,22 +73,24 @@ def getBamReadPairs(bamfile1,bamfile2, skip_repeated_reads=False): #pragma: no c
     """
     bam1 = bam_lines(bamfile1)
     bam2 = bam_lines(bamfile2)
-    line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
-    line2= next(bam2).strip('\n').split()
-    while line1 and line2 and line1 !=[''] and line2 !=['']:
-        assert line1[0] == line2[0]
-        yield line1,line2
-        previous_read1 = line1[0]
-        previous_read2 = line2[0]
-        if skip_repeated_reads:
-            while line1 and line2 and line1 !=[''] and line2 !=[''] and line1[0] == previous_read1:
+    try:
+        line1= next(bam1).strip('\n').split() #split on white space. Results in 11 fields of mandatory SAM + variable number of additional tags.
+        line2= next(bam2).strip('\n').split()
+        while line1 and line2 and line1 !=[''] and line2 !=['']:
+            assert line1[0] == line2[0]
+            yield line1,line2
+            previous_read1 = line1[0]
+            previous_read2 = line2[0]
+            if skip_repeated_reads:
+                while line1 and line2 and line1 !=[''] and line2 !=[''] and line1[0] == previous_read1:
+                    line1= next(bam1).strip('\n').split()
+                while line1 and line2 and line1 !=[''] and line2 !=[''] and line2[0] == previous_read2:
+                    line2= next(bam2).strip('\n').split()
+            else:
                 line1= next(bam1).strip('\n').split()
-            while line1 and line2 and line1 !=[''] and line2 !=[''] and line2[0] == previous_read2:
                 line2= next(bam2).strip('\n').split()
-        else:
-            line1= next(bam1).strip('\n').split()
-            line2= next(bam2).strip('\n').split()
-    pass
+    except StopIteration:
+        return
 
 def getReadPairs(sam1,sam2, skip_repeated_reads=False):
     """Process two sam files to yield the equivalent line from each file
