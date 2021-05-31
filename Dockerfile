@@ -18,7 +18,7 @@
 
 # This will run the following executable part of this file
 
-FROM ubuntu:14.04
+FROM ubuntu:trusty-20190515
 MAINTAINER Matthew Wakefield <matthew.wakefield@unimelb.edu.au>
 RUN apt-get update && apt-get install -y \
 	samtools \
